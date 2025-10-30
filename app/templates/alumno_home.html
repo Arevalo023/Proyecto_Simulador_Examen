@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <h2 class="card-title">Bienvenido</h2>
+    <p class="card-desc">
+        Hola {{ nombre }} 👋
+    </p>
+
+    <p class="card-desc">
+        Desde aquí vas a poder iniciar el simulador de práctica (20 preguntas, 1 min c/u),
+        y el simulador final.
+    </p>
+
+    <div class="actions-row">
+        <a class="btn-primary" href="#">Iniciar práctica</a>
+        <a class="btn-secondary" href="#">Iniciar examen final</a>
+    </div>
+</div>
+
+{% endblock %}

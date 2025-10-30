@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <h2 class="card-title">Panel de Administrador</h2>
+    <p class="card-desc">
+        Hola {{ nombre }} ({{ rol }}), matricula {{ matricula }}.
+    </p>
+
+    <p class="card-desc">
+        Aquí va el dashboard: intentos de practica vs final,
+        % aprobados, promedios, etc.
+    </p>
+</div>
+
+{% endblock %}
