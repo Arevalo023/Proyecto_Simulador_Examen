@@ -65,7 +65,6 @@ Para ejecutar el script:
 ```sql
 SOURCE bd_script.txt;
 
-
 Tablas principales:
 
 estudiante
@@ -80,26 +79,25 @@ intentos_examen
 
 examen_respuestas
 
- Tecnologías utilizadas
+⚠️ Las imágenes de las señales están guardadas en la carpeta:
+app/static/img/senales/
 
-Backend: Flask (Python 3.12)
+⚙️ Tecnologías Utilizadas
+Componente	Tecnología
+Backend	Python 3.12 (Flask)
+Frontend	HTML5, CSS3, JavaScript
+Base de datos	MySQL
+Encriptación	bcrypt
+Librerías	Flask-MySQL, Flask, bcrypt
+Entorno	Visual Studio Code
+▶️ Ejecución del Proyecto
 
-Base de datos: MySQL
-
-Frontend: HTML, CSS, JavaScript
-
-Estilos: static/css/styles.css
-
-Scripts dinámicos: static/js/exam_timer.js
-
-- Ejecución del proyecto
-
-Instalar dependencias:
+Instala las dependencias necesarias:
 
 pip install -r requirements.txt
 
 
-Configurar la base de datos en config.py:
+Configura la base de datos en config.py:
 
 MYSQL_HOST = 'localhost'
 MYSQL_USER = 'root'
@@ -107,32 +105,44 @@ MYSQL_PASSWORD = 'tu_contraseña'
 MYSQL_DB = 'simulador_manejo'
 
 
-Ejecutar el servidor Flask:
+Ejecuta el servidor:
 
 python run.py
 
 
-Acceder en el navegador a:
+El navegador se abrirá automáticamente con la dirección:
 
 http://127.0.0.1:5000
 
-📂 Notas adicionales
+📂 Notas Adicionales
 
-El archivo bd_script.txt incluye todos los inserts necesarios (imágenes, preguntas, respuestas).
+El archivo bd_script.txt contiene todo el esquema de la base de datos y los inserts de las 80 preguntas.
 
-Las imágenes deben colocarse en:
+Las imágenes deben almacenarse en:
 
-static/img/senales/
+app/static/img/senales/
 
 
-El sistema abre automáticamente el navegador al iniciar Flask.
+Se utilizó bcrypt para el cifrado de contraseñas.
 
-La autenticación está encriptada con bcrypt.
+El sistema maneja dos roles de acceso: alumno y admin.
 
-Conclusión
+🧠 Funcionalidad del Simulador
 
-El Simulador de Examen de Manejo cumple con los objetivos de la materia Simulación, al modelar un sistema interactivo que reproduce el proceso real de evaluación teórica para licencias de conducir, aplicando elementos de aleatoriedad controlada, tiempos de respuesta y validación automática.
+Selecciona aleatoriamente preguntas de la base de datos.
 
-© 2025 – Diana Arévalo & Ángel Sánchez
+Asegura que cada examen tenga al menos una pregunta de cada categoría.
+
+Guarda el historial de intentos, calificaciones y duración.
+
+Permite comparar resultados y mejorar desempeño en cada intento.
+
+🏁 Conclusión
+
+El Simulador de Examen de Manejo replica el comportamiento de una evaluación teórica real para obtener la licencia de conducir.
+Aplicando principios de Simulación, el sistema ofrece aleatoriedad controlada, medición de tiempo, validación automática de respuestas y análisis estadístico para los resultados.
+
+© 2025 — Diana Arévalo & Ángel Sánchez
 Materia: Simulación
 Profesor: David Pérez Tinoco
+Universidad Autónoma de Coahuila (UAdeC)
