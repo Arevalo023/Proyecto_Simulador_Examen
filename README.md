@@ -65,7 +65,7 @@ Para ejecutar el script:
 SOURCE bd_script.txt;
  
 
- 
+
 Tablas principales:
 
 estudiante
@@ -80,10 +80,10 @@ intentos_examen
 
 examen_respuestas
 
-⚠️ Las imágenes de las señales están guardadas en la carpeta:
+* Las imágenes de las señales están guardadas en la carpeta:
 app/static/img/senales/
 
-⚙️ Tecnologías Utilizadas
+ Tecnologías Utilizadas
 Componente	Tecnología
 Backend	Python 3.12 (Flask)
 Frontend	HTML5, CSS3, JavaScript
@@ -91,7 +91,7 @@ Base de datos	MySQL
 Encriptación	bcrypt
 Librerías	Flask-MySQL, Flask, bcrypt
 Entorno	Visual Studio Code
-▶️ Ejecución del Proyecto
+▶Ejecución del Proyecto
 
 Instala las dependencias necesarias:
 
@@ -115,7 +115,7 @@ El navegador se abrirá automáticamente con la dirección:
 
 http://127.0.0.1:5000
 
-📂 Notas Adicionales
+Notas Adicionales
 
 El archivo bd_script.txt contiene todo el esquema de la base de datos y los inserts de las 80 preguntas.
 
@@ -128,7 +128,7 @@ Se utilizó bcrypt para el cifrado de contraseñas.
 
 El sistema maneja dos roles de acceso: alumno y admin.
 
-🧠 Funcionalidad del Simulador
+Funcionalidad del Simulador
 
 Selecciona aleatoriamente preguntas de la base de datos.
 
@@ -138,7 +138,7 @@ Guarda el historial de intentos, calificaciones y duración.
 
 Permite comparar resultados y mejorar desempeño en cada intento.
 
-🏁 Conclusión
+Conclusión
 
 El Simulador de Examen de Manejo replica el comportamiento de una evaluación teórica real para obtener la licencia de conducir.
 Aplicando principios de Simulación, el sistema ofrece aleatoriedad controlada, medición de tiempo, validación automática de respuestas y análisis estadístico para los resultados.
