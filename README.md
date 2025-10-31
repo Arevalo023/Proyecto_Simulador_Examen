@@ -62,9 +62,10 @@ La base de datos se encuentra definida en el script `bd_script.txt`, que contien
 3. Los inserts con los **80 reactivos** del examen, clasificados por tema.
 
 Para ejecutar el script:
-```sql
 SOURCE bd_script.txt;
+ 
 
+ 
 Tablas principales:
 
 estudiante
