@@ -1,0 +1,720 @@
+
+
+----------------POBLAR DATOS DE PREGUNTAS-------------------
+
+USE simulador_manejo;
+-- ===============================================
+-- 🔸 1. Banco de imágenes para señalización vial
+-- ===============================================
+INSERT INTO banco_imagenes (ruta) VALUES
+('static/img/senales/linea_amarilla.png'),
+('static/img/senales/senal_alto.png'),
+('static/img/senales/linea_discontinua.png'),
+('static/img/senales/flecha_pavimento.png'),
+('static/img/senales/senal_glorieta.png'),
+('static/img/senales/cinturon_obligatorio.png'),
+('static/img/senales/peso_restringido.png'),
+('static/img/senales/senal_estacionamiento.png'),
+('static/img/senales/linea_peatonal.png'),
+('static/img/senales/senal_peligro.png');
+
+
+-- =============================
+--  Preguntas: Señalización vial
+-- =============================
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(1, '¿Qué indica una línea amarilla continua en el centro de la vía?', 'I', 'señalización'),
+(2, '¿Qué significa la señal de la imagen?', 'I', 'señalización'),
+(3, '¿Qué significa una línea discontinua blanca entre carriles?', 'I', 'señalización'),
+(4, '¿Qué indica una flecha pintada sobre el pavimento?', 'I', 'señalización'),
+(5, '¿Qué significa la señal de la imagen?', 'I', 'señalización'),
+(6, '¿Qué significa la señal de la imagen?', 'I', 'señalización'),
+(7, '¿Qué significa la señal de la imagen?', 'I', 'señalización'),
+(8, '¿Qué significa la señal de la imagen?', 'I', 'señalización'),
+(9, '¿Qué indica una línea peatonal marcada con franjas blancas?', 'I', 'señalización'),
+(10, '¿Qué significa la señal de la imagen?', 'I', 'señalización');
+
+
+-- RESPUESTAS PARA PREGUNTAS DE SEÑALIZACIÓN VIAL
+
+-- 1¿Qué indica una línea amarilla continua en el centro de la vía?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(1, 'Prohibido rebasar o cambiar de carril', 1),
+(1, 'Permitido estacionarse en cualquier lado', 0),
+(1, 'Zona escolar', 0),
+(1, 'Carril exclusivo para bicicletas', 0);
+
+-- 2 ¿Qué significa una señal de color rojo con letras blancas que dice “ALTO”?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(2, 'Debe detener completamente el vehículo', 1),
+(2, 'Solo reducir velocidad', 0),
+(2, 'Ceder el paso únicamente a peatones', 0),
+(2, 'Significa que puede continuar con precaución', 0);
+
+-- 3 ¿Qué significa una línea discontinua blanca entre carriles?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(3, 'Está permitido cambiar de carril con precaución', 1),
+(3, 'Está prohibido rebasar', 0),
+(3, 'Carril exclusivo para transporte público', 0),
+(3, 'Indica zona de estacionamiento', 0);
+
+-- 4¿Qué indica una flecha pintada sobre el pavimento?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(4, 'La dirección que el conductor debe seguir', 1),
+(4, 'Zona de cruce peatonal', 0),
+(4, 'Inicio de curva peligrosa', 0),
+(4, 'Lugar donde se permite estacionar', 0);
+
+-- 5 ¿GLORIETA?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(5, 'Glorieta', 1),
+(5, 'Dar una vuelta', 0),
+(5, 'Se aproxima un tunel', 0),
+(5, 'Solo reducir velocidad', 0);
+
+-- 6 USAR CINTURON
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(6, 'Uso obligatorio el cinturón de seguridad', 1),
+(6, 'No bajarse del vehículo', 0),
+(6, 'No parar el vehículo', 0),
+(6, 'No llevar bebés en los asientos de enfrente', 0);
+
+-- 7 PESO RESTRINGIDO
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(7, 'Prohibición de circular vehículos que excedan el peso indicado', 1),
+(7, 'Advertencia de zona escolar', 0),
+(7, 'Curva pronunciada a la derecha', 0),
+(7, 'Prohibido estacionarse', 0);
+
+
+-- 8 ¿Qué significa una señal azul con una letra “E” blanca?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(8, 'Zona de estacionamiento permitido', 1),
+(8, 'Entrada exclusiva para emergencias', 0),
+(8, 'Espacio para transporte público', 0),
+(8, 'Prohibido estacionarse', 0);
+
+-- 9 ¿Qué indica una línea peatonal marcada con franjas blancas?
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(9, 'Zona de cruce peatonal', 1),
+(9, 'Límite máximo de velocidad', 0),
+(9, 'Zona de rebase permitido', 0),
+(9, 'Área exclusiva para bicicletas', 0);
+
+-- 10 
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(10, 'Advertencia o precaución ante peligro', 1),
+(10, 'Señal reglamentaria de alto total', 0),
+(10, 'Zona de estacionamiento', 0),
+(10, 'Fin de zona escolar', 0);
+
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, 'Cuando el semáforo está en ROJO, ¿qué debes hacer?', 'T', 'semaforo_prioridad'),
+(NULL, 'Una luz AMARILLA fija en el semáforo significa:', 'T', 'semaforo_prioridad'),
+(NULL, 'Una luz VERDE en el semáforo significa:', 'T', 'semaforo_prioridad'),
+(NULL, 'Si el semáforo está APAGADO en un cruce, ¿qué regla aplicas?', 'T', 'semaforo_prioridad'),
+(NULL, '¿A quién debes dar prioridad al cruzar una intersección sin semáforo?', 'T', 'semaforo_prioridad'),
+(NULL, 'Un vehículo de emergencia (ambulancia, bomberos, policía) con sirena encendida se aproxima. ¿Qué haces?', 'T', 'semaforo_prioridad'),
+(NULL, 'En un cruce, si un peatón está cruzando con luz peatonal en verde, tú…', 'T', 'semaforo_prioridad'),
+(NULL, '¿Cuándo puedes dar vuelta a la derecha con luz roja?', 'T', 'semaforo_prioridad'),
+(NULL, 'Vas manejando y la luz del semáforo cambia de verde a amarillo justo al llegar. ¿Qué es lo CORRECTO?', 'T', 'semaforo_prioridad'),
+(NULL, 'En una rotonda (glorieta), ¿quién tiene prioridad de paso?', 'T', 'semaforo_prioridad');
+
+-- Pregunta 11: "Cuando el semáforo está en ROJO, ¿qué debes hacer?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(11, 'Detenerte por completo antes de la línea de alto', 1),
+(11, 'Avanzar si no ves carros', 0),
+(11, 'Acelerar para despejar la intersección', 0),
+(11, 'Tocar claxon y continuar', 0);
+
+-- Pregunta 12: "Una luz AMARILLA fija en el semáforo significa:"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(12, 'Prepárate para detenerte, la luz va a cambiar a rojo', 1),
+(12, 'Acelera para pasar antes del rojo', 0),
+(12, 'El semáforo está descompuesto', 0),
+(12, 'Puedes estacionarte en la intersección', 0);
+
+-- Pregunta 13: "Una luz VERDE en el semáforo significa:"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(13, 'Puedes avanzar si es seguro hacerlo', 1),
+(13, 'Debes acelerar al máximo', 0),
+(13, 'Tienes prioridad absoluta sobre peatones siempre', 0),
+(13, 'Es una advertencia de alto total', 0);
+
+-- Pregunta 14: "Si el semáforo está APAGADO en un cruce, ¿qué regla aplicas?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(14, 'Tratarlo como un cruce de alto para todos (4 altos)', 1),
+(14, 'Ignorar el cruce y seguir normal', 0),
+(14, 'Solo frenar si ves patrulla', 0),
+(14, 'Pasar sin detenerte si llevas la música baja', 0);
+
+-- Pregunta 15: "¿A quién debes dar prioridad al cruzar una intersección sin semáforo?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(15, 'Al vehículo que ya está dentro de la intersección', 1),
+(15, 'Al vehículo más grande', 0),
+(15, 'Al que viene con las luces altas', 0),
+(15, 'A nadie, paso yo siempre', 0);
+
+-- Pregunta 16: "Vehículo de emergencia con sirena encendida se aproxima. ¿Qué haces?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(16, 'Ceder el paso: orillarte y permitir que pase primero', 1),
+(16, 'Competirle para no quedar atrás', 0),
+(16, 'Seguirlo muy pegado para avanzar rápido', 0),
+(16, 'Bloquear su carril para que baje la velocidad', 0);
+
+-- Pregunta 17: "Si un peatón está cruzando con luz peatonal en verde, tú…"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(17, 'Te detienes y le cedes el paso', 1),
+(17, 'Le haces seña con las luces para que se apure', 0),
+(17, 'Le pasas por delante mientras alcanza a brincar', 0),
+(17, 'Le tocas el claxon para avisar que tú vienes primero', 0);
+
+-- Pregunta 18: "¿Cuándo puedes dar vuelta a la derecha con luz roja?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(18, 'Solo cuando está permitido y te detienes completamente primero', 1),
+(18, 'Siempre, sin parar', 0),
+(18, 'Solo si vas tarde', 0),
+(18, 'Nunca jamás bajo ninguna circunstancia', 0);
+
+-- Pregunta 19: "Luz verde → luz amarilla al llegar. ¿Qué es lo CORRECTO?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(19, 'Frenar con seguridad y prepararte para detenerte', 1),
+(19, 'Acelerar a fondo para cruzar antes del rojo', 0),
+(19, 'Irte en reversa', 0),
+(19, 'Cerrar los ojos y confiar', 0);
+
+-- Pregunta 20: "En una rotonda (glorieta), ¿quién tiene prioridad de paso?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(20, 'El vehículo que YA está circulando dentro de la rotonda', 1),
+(20, 'El que llega más rápido a la entrada', 0),
+(20, 'El que toca más fuerte el claxon', 0),
+(20, 'El más grande o pesado (camión, tráiler, etc.)', 0);
+
+USE simulador_manejo;
+
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, '¿Cuál es el límite de velocidad típico en una zona escolar cuando hay estudiantes presentes?', 'T', 'velocidad'),
+(NULL, '¿Qué debes hacer si las condiciones de lluvia reducen tu visibilidad?', 'T', 'velocidad'),
+(NULL, 'En una calle residencial (colonia), ¿qué velocidad se considera segura?', 'T', 'velocidad'),
+(NULL, 'Si ves una señal que marca 80 km/h como límite, esto significa:', 'T', 'velocidad'),
+(NULL, '¿Qué pasa si conduces demasiado lento en una vía rápida sin necesidad?', 'T', 'velocidad'),
+(NULL, '¿Por qué es peligroso frenar de golpe a alta velocidad?', 'T', 'velocidad'),
+(NULL, '¿Cuándo es obligatorio reducir la velocidad aunque no haya señal visible?', 'T', 'velocidad'),
+(NULL, '¿Qué debes hacer al acercarte a un tope (reductor de velocidad)?', 'T', 'velocidad'),
+(NULL, '¿Por qué se recomienda mantener distancia con el vehículo de enfrente al ir rápido?', 'T', 'velocidad'),
+(NULL, '¿Qué indica una señal que dice “Velocidad mínima 40 km/h”?', 'T', 'velocidad');
+-- Pregunta 21: zona escolar
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(21, 'Alrededor de 20 km/h', 1),
+(21, '60 km/h siempre', 0),
+(21, 'No importa, mientras no uses el claxon', 0),
+(21, 'La velocidad que prefieras si tienes prisa', 0);
+
+-- Pregunta 22: lluvia / baja visibilidad
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(22, 'Reducir la velocidad y aumentar la distancia de seguridad', 1),
+(22, 'Encender las luces altas y acelerar', 0),
+(22, 'Frenar bruscamente cada 2 segundos', 0),
+(22, 'Cerrar los ojos para evitar el reflejo del agua', 0);
+
+-- Pregunta 23: calle residencial / colonia
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(23, 'Velocidad baja y controlada, aprox. 30 km/h', 1),
+(23, '80 km/h si la calle está libre', 0),
+(23, 'Lo rápido que dé tu carro', 0),
+(23, 'Solo en reversa para ir más seguro', 0);
+
+-- Pregunta 24: señal 80 km/h
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(24, 'Esa es la velocidad máxima permitida en condiciones normales', 1),
+(24, 'Esa es la velocidad mínima obligatoria', 0),
+(24, 'Solo aplica de noche', 0),
+(24, 'Puedes ir más rápido si no hay tránsito', 0);
+
+-- Pregunta 25: ir demasiado lento
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(25, 'Puede ser peligroso porque estorbas el flujo normal del tráfico', 1),
+(25, 'Es imposible causar peligro si vas lento', 0),
+(25, 'Te da prioridad en todas las intersecciones', 0),
+(25, 'Te convierte automáticamente en vehículo de emergencia', 0);
+
+-- Pregunta 26: frenar de golpe a alta velocidad
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(26, 'Pierdes control y puedes derrapar o ser chocado por detrás', 1),
+(26, 'Mejora la estabilidad del auto', 0),
+(26, 'Ahorra gasolina', 0),
+(26, 'Es la técnica correcta para estacionarte rápido', 0);
+
+-- Pregunta 27: reducir velocidad sin señal
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(27, 'Al acercarte a escuelas, hospitales o cruces peatonales', 1),
+(27, 'Solo cuando ves patrulla', 0),
+(27, 'Nunca, si no hay señal no reduces', 0),
+(27, 'Únicamente cuando vas tarde', 0);
+
+-- Pregunta 28: aproximarse a un tope
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(28, 'Bajar la velocidad significativamente para pasarlo sin brincar', 1),
+(28, 'Acelerar fuerte para “volarlo”', 0),
+(28, 'Pasarlo en diagonal ocupando dos carriles', 0),
+(28, 'Pitar para que el tope se quite', 0);
+
+-- Pregunta 29: distancia con el de enfrente
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(29, 'Para tener espacio de frenado en caso de emergencia', 1),
+(29, 'Para que quepa otro carro y haga sandwich', 0),
+(29, 'Para poder textear más cómodo', 0),
+(29, 'Para que el de atrás se enoje', 0);
+
+-- Pregunta 30: "Velocidad mínima 40 km/h"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(30, 'No debes circular más lento de 40 km/h en condiciones normales', 1),
+(30, 'Debes ir exactamente a 40 km/h siempre', 0),
+(30, 'Es la velocidad máxima permitida en zona escolar', 0),
+(30, 'Solo aplica a motocicletas', 0);
+
+
+-----------------------------
+
+USE simulador_manejo;
+
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, '¿Cuál es uno de los primeros efectos del alcohol al conducir?', 'T', 'alcohol'),
+(NULL, 'Conducir bajo los efectos del alcohol aumenta el riesgo de:', 'T', 'alcohol'),
+(NULL, '¿Qué pasa con tus reflejos cuando manejas después de beber?', 'T', 'alcohol'),
+(NULL, 'Si un conductor se niega a una prueba de alcohol (alcoholímetro), la autoridad de tránsito puede:', 'T', 'alcohol'),
+(NULL, '¿Cuál es la decisión correcta si has bebido alcohol y necesitas ir a casa?', 'T', 'alcohol'),
+(NULL, 'El alcohol afecta principalmente tu:', 'T', 'alcohol'),
+(NULL, 'Conducir bajo sustancias ilegales (drogas) es:', 'T', 'alcohol'),
+(NULL, 'Si estás tomando un medicamento que causa sueño, deberías:', 'T', 'alcohol'),
+(NULL, 'Por seguridad vial, ¿cuándo NO deberías conducir?', 'T', 'alcohol'),
+(NULL, '¿Qué implica “conducir bajo influencia” (DUI)?', 'T', 'alcohol');
+
+
+-- Pregunta 31: "¿Cuál es uno de los primeros efectos del alcohol al conducir?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(31, 'Disminuye tu juicio y tu capacidad de tomar decisiones correctas', 1),
+(31, 'Mejora tu visión nocturna', 0),
+(31, 'Te da reflejos más rápidos', 0),
+(31, 'Te hace manejar más derecho', 0);
+
+-- Pregunta 32: "Conducir bajo los efectos del alcohol aumenta el riesgo de:"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(32, 'Provocar un accidente grave', 1),
+(32, 'Ahorrar gasolina', 0),
+(32, 'Pasar más rápido los semáforos', 0),
+(32, 'Tener prioridad sobre otros autos', 0);
+
+-- Pregunta 33: "¿Qué pasa con tus reflejos cuando manejas después de beber?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(33, 'Se vuelven más lentos y menos precisos', 1),
+(33, 'Se vuelven automáticos y perfectos', 0),
+(33, 'No cambian en absoluto', 0),
+(33, 'Mejora tu coordinación mano-ojo', 0);
+
+-- Pregunta 34: "Si un conductor se niega a una prueba de alcohol..."
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(34, 'Puede enfrentar sanciones como multa o suspensión', 1),
+(34, 'Automáticamente queda libre porque no hay prueba', 0),
+(34, 'Solo le piden que se vaya a su casa', 0),
+(34, 'Le dan acompañamiento escoltado', 0);
+
+-- Pregunta 35: "Decisión correcta si bebiste y necesitas ir a casa"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(35, 'Pedir un conductor designado o un ride seguro', 1),
+(35, 'Manejar despacio y con intermitentes', 0),
+(35, 'Beber café y ya puedes manejar', 0),
+(35, 'Esperar 10 minutos y asumir que ya pasó el efecto', 0);
+
+-- Pregunta 36: "El alcohol afecta principalmente tu:"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(36, 'Capacidad de reacción y coordinación', 1),
+(36, 'Color de ojos', 0),
+(36, 'Estatura', 0),
+(36, 'Capacidad para usar direccionales', 0);
+
+-- Pregunta 37: "Conducir bajo sustancias ilegales (drogas) es:"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(37, 'Ilegal y extremadamente peligroso', 1),
+(37, 'Aceptable si conoces bien la zona', 0),
+(37, 'Seguro si vas con las luces altas', 0),
+(37, 'Permitido si es de día', 0);
+
+-- Pregunta 38: "Si tomas un medicamento que causa sueño, deberías:"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(38, 'Evitar manejar o buscar a otra persona que conduzca', 1),
+(38, 'Manejar solo distancias largas en autopista', 0),
+(38, 'Subir el volumen de la música y ya', 0),
+(38, 'Tomar más medicamento para acostumbrarte', 0);
+
+-- Pregunta 39: "¿Cuándo NO deberías conducir?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(39, 'Cuando estás mareado, somnoliento o bajo efectos de alcohol/droga', 1),
+(39, 'Cuando llevas lentes', 0),
+(39, 'Cuando está soleado', 0),
+(39, 'Cuando el tanque está lleno', 0);
+
+-- Pregunta 40: "¿Qué implica “conducir bajo influencia” (DUI)?"
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(40, 'Conducir con tus habilidades afectadas por alcohol o drogas', 1),
+(40, 'Conducir con música alta', 0),
+(40, 'Conducir con más de dos pasajeros', 0),
+(40, 'Conducir usando lentes de sol', 0);
+
+------------------------------
+
+USE simulador_manejo;
+
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, '¿Qué documento debes portar SIEMPRE para poder manejar legalmente?', 'T', 'documentacion'),
+(NULL, 'La tarjeta de circulación sirve para:', 'T', 'documentacion'),
+(NULL, '¿Para qué sirve el seguro de responsabilidad civil vehicular?', 'T', 'documentacion'),
+(NULL, 'Si un oficial de tránsito te detiene, ¿qué estás obligado a mostrar?', 'T', 'documentacion'),
+(NULL, '¿Qué pasa si manejas con una licencia vencida?', 'T', 'documentacion'),
+(NULL, '¿Qué indica la verificación vehicular vigente?', 'T', 'documentacion'),
+(NULL, '¿Cuál de los siguientes documentos identifica al conductor oficialmente como autorizado para manejar?', 'T', 'documentacion'),
+(NULL, '¿Qué debes hacer si extravías tu licencia de conducir?', 'T', 'documentacion'),
+(NULL, '¿Cuándo debes mostrar tu póliza o comprobante de seguro?', 'T', 'documentacion'),
+(NULL, '¿Quién está legalmente autorizado para conducir un vehículo?', 'T', 'documentacion');
+
+-- Pregunta 41:
+-- '¿Qué documento debes portar SIEMPRE para poder manejar legalmente?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(41, 'La licencia de conducir vigente', 1),
+(41, 'Tu credencial de la escuela', 0),
+(41, 'Tu acta de nacimiento original', 0),
+(41, 'Un recibo de luz reciente', 0);
+
+-- Pregunta 42:
+-- 'La tarjeta de circulación sirve para:'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(42, 'Identificar al vehículo (placas, datos) y a su propietario registrado', 1),
+(42, 'Dar permiso para ir a más de 100 km/h', 0),
+(42, 'Sustituir la licencia de conducir', 0),
+(42, 'Pagar casetas sin dinero', 0);
+
+-- Pregunta 43:
+-- '¿Para qué sirve el seguro de responsabilidad civil vehicular?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(43, 'Para cubrir daños que causes a otras personas o vehículos', 1),
+(43, 'Para no usar cinturón de seguridad', 0),
+(43, 'Para poder estacionarte en lugares exclusivos', 0),
+(43, 'Para circular sin placas', 0);
+
+-- Pregunta 44:
+-- 'Si un oficial de tránsito te detiene, ¿qué estás obligado a mostrar?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(44, 'Licencia, tarjeta de circulación y, si aplica, seguro vigente', 1),
+(44, 'Tu CURP y tu número de seguro social', 0),
+(44, 'Un permiso firmado por tus papás', 0),
+(44, 'Pruebas de que vienes con prisa', 0);
+
+-- Pregunta 45:
+-- '¿Qué pasa si manejas con una licencia vencida?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(45, 'Te pueden multar o sancionar porque no es válida', 1),
+(45, 'No pasa nada mientras manejes bien', 0),
+(45, 'La licencia se renueva sola al manejar', 0),
+(45, 'La policía no puede decir nada si es tu coche', 0);
+
+-- Pregunta 46:
+-- '¿Qué indica la verificación vehicular vigente?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(46, 'Que el auto cumple con las normas ambientales / emisiones permitidas', 1),
+(46, 'Que el auto puede circular a cualquier velocidad', 0),
+(46, 'Que tienes permiso para estacionarte en cualquier lado', 0),
+(46, 'Que el carro está a tu nombre', 0);
+
+-- Pregunta 47:
+-- '¿Cuál documento identifica al conductor como autorizado para manejar?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(47, 'La licencia de conducir vigente', 1),
+(47, 'El comprobante de domicilio', 0),
+(47, 'El pasaporte', 0),
+(47, 'El INE de tu primo', 0);
+
+-- Pregunta 48:
+-- '¿Qué debes hacer si extravías tu licencia de conducir?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(48, 'Reportarla y tramitar una reposición oficial', 1),
+(48, 'Usar una foto en el celular y decir que “ahí está”', 0),
+(48, 'Seguir manejando sin nada porque tú sí sabes manejar', 0),
+(48, 'Imprimir una imagen de Google', 0);
+
+-- Pregunta 49:
+-- '¿Cuándo debes mostrar tu póliza o comprobante de seguro?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(49, 'Cuando una autoridad te lo solicita tras una detención o accidente', 1),
+(49, 'Solo cuando vas saliendo de tu casa', 0),
+(49, 'Nunca, es privado', 0),
+(49, 'Únicamente si no eres el dueño del coche', 0);
+
+-- Pregunta 50:
+-- '¿Quién está legalmente autorizado para conducir un vehículo?'
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(50, 'Quien tiene licencia válida para ese tipo de vehículo', 1),
+(50, 'Cualquiera que alcance los pedales', 0),
+(50, 'La persona más grande de edad en el carro', 0),
+(50, 'El pasajero que no haya tomado alcohol', 0);
+
+---------------------------------------
+
+USE simulador_manejo;
+
+-- =============================
+-- 🔹 Preguntas: Autoridad vial
+-- =============================
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, '¿Quién tiene la autoridad para aplicar sanciones de tránsito?', 'T', 'autoridad_vial'),
+(NULL, 'Si un agente de tránsito te indica detenerte, tú debes:', 'T', 'autoridad_vial'),
+(NULL, '¿Qué debes hacer si una patrulla te pide que te orilles?', 'T', 'autoridad_vial'),
+(NULL, 'Ignorar la orden de un agente de tránsito puede generar:', 'T', 'autoridad_vial'),
+(NULL, 'Cuando un agente da una indicación contraria al semáforo, debes:', 'T', 'autoridad_vial'),
+(NULL, '¿Qué significa cuando un agente levanta un brazo con la palma hacia ti?', 'T', 'autoridad_vial'),
+(NULL, '¿Qué debes hacer si un agente usa silbato y te señala el alto?', 'T', 'autoridad_vial'),
+(NULL, '¿Cuándo un conductor puede negarse a mostrar documentos al agente?', 'T', 'autoridad_vial'),
+(NULL, '¿Qué hacer si consideras injusta una infracción de tránsito?', 'T', 'autoridad_vial'),
+(NULL, '¿Quiénes están exentos de detenerse ante semáforos cuando usan sirenas y luces de emergencia?', 'T', 'autoridad_vial');
+-- Pregunta 51
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(51, 'Los agentes de tránsito o autoridades viales competentes', 1),
+(51, 'Cualquier ciudadano que grabe con su celular', 0),
+(51, 'El conductor más experimentado', 0),
+(51, 'Los peatones en grupo', 0);
+
+-- Pregunta 52
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(52, 'Obedecer de inmediato la instrucción y detenerte con seguridad', 1),
+(52, 'Acelerar para evitar la multa', 0),
+(52, 'Discutir antes de detenerte', 0),
+(52, 'Ignorarlo si llevas prisa', 0);
+
+-- Pregunta 53
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(53, 'Orillarte con precaución, apagar motor y esperar indicaciones', 1),
+(53, 'Detenerte en seco sin importar el carril', 0),
+(53, 'Seguir circulando hasta tu destino', 0),
+(53, 'Bajarte y reclamar al agente', 0);
+
+-- Pregunta 54
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(54, 'Multa, sanción o incluso detención administrativa', 1),
+(54, 'Una felicitación por tu valentía', 0),
+(54, 'No pasa nada si no te ven', 0),
+(54, 'Revisión gratuita del coche', 0);
+
+-- Pregunta 55
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(55, 'Obedecer la indicación del agente, tiene prioridad sobre el semáforo', 1),
+(55, 'Hacer caso solo al semáforo', 0),
+(55, 'Acelerar para no confundir al agente', 0),
+(55, 'Esperar a que el semáforo cambie', 0);
+
+-- Pregunta 56
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(56, 'Detenerte de inmediato', 1),
+(56, 'Seguir avanzando lentamente', 0),
+(56, 'Tocar el claxon para preguntar', 0),
+(56, 'Acelerar antes de que baje el brazo', 0);
+
+-- Pregunta 57
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(57, 'Reducir velocidad y detenerte, el silbato indica alto total', 1),
+(57, 'Ignorar si no hay tráfico', 0),
+(57, 'Solo frenar un poco y seguir', 0),
+(57, 'Dar vuelta rápida para evitarlo', 0);
+
+-- Pregunta 58
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(58, 'Nunca; estás obligado a mostrar tus documentos al ser requerido', 1),
+(58, 'Cuando el agente no trae uniforme', 0),
+(58, 'Si es de noche', 0),
+(58, 'Cuando tú digas que “no tienes tiempo”', 0);
+
+-- Pregunta 59
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(59, 'Recurrir la multa por los medios legales correspondientes', 1),
+(59, 'No pagarla nunca', 0),
+(59, 'Pagarla a un amigo del agente', 0),
+(59, 'Grabar un video y huir', 0);
+
+-- Pregunta 60
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(60, 'Vehículos de emergencia con luces y sirena activadas', 1),
+(60, 'Motocicletas deportivas', 0),
+(60, 'Vehículos particulares de color rojo', 0),
+(60, 'Vehículos con permiso temporal', 0);
+------------------------------
+
+USE simulador_manejo;
+
+-- =============================
+-- 🔹 Preguntas: Mecánica básica
+-- =============================
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, '¿Qué debes hacer si en el tablero se enciende la luz de aceite del motor?', 'T', 'mecanica_basica'),
+(NULL, '¿Qué indica que un vehículo está sobrecalentado?', 'T', 'mecanica_basica'),
+(NULL, '¿Cada cuánto tiempo se recomienda revisar la presión de las llantas?', 'T', 'mecanica_basica'),
+(NULL, '¿Cuál es la función del líquido de frenos?', 'T', 'mecanica_basica'),
+(NULL, '¿Qué pasa si manejas con los frenos en mal estado?', 'T', 'mecanica_basica'),
+(NULL, '¿Qué significa que el motor haga ruidos extraños al arrancar?', 'T', 'mecanica_basica'),
+(NULL, '¿Qué debes revisar antes de un viaje largo?', 'T', 'mecanica_basica'),
+(NULL, '¿Qué debes hacer si una llanta se poncha mientras manejas?', 'T', 'mecanica_basica'),
+(NULL, '¿Cuál es la función de las luces intermitentes?', 'T', 'mecanica_basica'),
+(NULL, '¿Por qué es importante revisar los niveles de líquidos del vehículo?', 'T', 'mecanica_basica');
+
+-- Pregunta 61
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(61, 'Detenerte de inmediato y revisar el nivel de aceite', 1),
+(61, 'Acelerar para que se apague la luz', 0),
+(61, 'Ignorarla si el auto sigue andando', 0),
+(61, 'Esperar a que se apague sola', 0);
+
+-- Pregunta 62
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(62, 'El indicador de temperatura llega a zona roja o sale vapor del motor', 1),
+(62, 'Las luces delanteras se apagan', 0),
+(62, 'El volante se pone duro', 0),
+(62, 'El auto deja de hacer ruido', 0);
+
+-- Pregunta 63
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(63, 'Al menos una vez por semana o antes de viajes largos', 1),
+(63, 'Solo cuando se ven desinfladas', 0),
+(63, 'Cada seis meses', 0),
+(63, 'Nunca, si son nuevas', 0);
+
+-- Pregunta 64
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(64, 'Permitir que los frenos funcionen correctamente transmitiendo presión', 1),
+(64, 'Lubricar el motor', 0),
+(64, 'Enfriar el radiador', 0),
+(64, 'Mantener el color del coche', 0);
+
+-- Pregunta 65
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(65, 'Aumenta el riesgo de accidente al no poder frenar a tiempo', 1),
+(65, 'Solo desgasta las llantas', 0),
+(65, 'No afecta en calles planas', 0),
+(65, 'Reduce el consumo de gasolina', 0);
+
+-- Pregunta 66
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(66, 'Puede haber falla en batería o bujías', 1),
+(66, 'Significa que el coche está feliz', 0),
+(66, 'Es señal de gasolina de mejor calidad', 0),
+(66, 'Es normal en días fríos', 0);
+
+-- Pregunta 67
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(67, 'Aceite, agua, frenos, llantas y luces', 1),
+(67, 'Solo limpiar el parabrisas', 0),
+(67, 'Acomodar el asiento y el radio', 0),
+(67, 'Nada, si es un coche nuevo', 0);
+
+-- Pregunta 68
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(68, 'Sujetar firme el volante, no frenar bruscamente y orillarte con precaución', 1),
+(68, 'Seguir manejando hasta tu destino', 0),
+(68, 'Acelerar para que se infle sola', 0),
+(68, 'Bajarte a empujar el coche', 0);
+
+-- Pregunta 69
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(69, 'Advertir a otros conductores de una emergencia o falla', 1),
+(69, 'Encenderlas por estética', 0),
+(69, 'Usarlas para pedir paso', 0),
+(69, 'Activarlas solo en estacionamiento', 0);
+
+-- Pregunta 70
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(70, 'Porque evitan daños al motor y garantizan un buen funcionamiento', 1),
+(70, 'Porque cambian el color del auto', 0),
+(70, 'Porque hacen ruido si están bajos', 0),
+(70, 'Porque es requisito de tránsito', 0);
+
+----------------------------
+USE simulador_manejo;
+
+INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
+(NULL, 'En un cruce peatonal, ¿quién tiene prioridad de paso?', 'T', 'educacion_vial'),
+(NULL, '¿Cuándo es correcto usar el claxon?', 'T', 'educacion_vial'),
+(NULL, 'Vas en una calle estrecha de doble sentido y viene otro auto de frente, ¿qué haces?', 'T', 'educacion_vial'),
+(NULL, 'Cuando ves a una persona mayor o con discapacidad cruzando la calle, tú debes:', 'T', 'educacion_vial'),
+(NULL, '¿Qué conducta es considerada manejo agresivo?', 'T', 'educacion_vial'),
+(NULL, '¿Cuál es una buena práctica al manejar cerca de ciclistas?', 'T', 'educacion_vial'),
+(NULL, 'Si alguien quiere incorporarse a tu carril con direccional encendida, lo correcto es:', 'T', 'educacion_vial'),
+(NULL, '¿Cuál es la actitud correcta en el tráfico pesado?', 'T', 'educacion_vial'),
+(NULL, '¿Por qué es importante dejar distancia con el vehículo de adelante en ciudad?', 'T', 'educacion_vial'),
+(NULL, '¿Cuál de las siguientes conductas demuestra buena educación vial?', 'T', 'educacion_vial');
+
+-- Pregunta 71
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(71, 'El peatón que está cruzando o por cruzar', 1),
+(71, 'El coche más grande', 0),
+(71, 'El que toque el claxon primero', 0),
+(71, 'Nadie, gana el más rápido', 0);
+
+-- Pregunta 72
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(72, 'Para alertar de un peligro inmediato o evitar un choque', 1),
+(72, 'Para insultar a otros conductores', 0),
+(72, 'Para pedir que se apuren en el semáforo', 0),
+(72, 'Para saludar a tus amigos en la banqueta', 0);
+
+-- Pregunta 73
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(73, 'Reducir velocidad y ceder el paso si es más seguro que uno pase primero', 1),
+(73, 'Acelerar y meterte primero cueste lo que cueste', 0),
+(73, 'Pararte en medio y bloquear el paso', 0),
+(73, 'Bajar la ventana para gritar', 0);
+
+-- Pregunta 74
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(74, 'Detenerte y permitirle cruzar con calma y seguridad', 1),
+(74, 'Acelerar para no “estorbarle”', 0),
+(74, 'Pasar pegado para que se apure', 0),
+(74, 'Tocar el claxon para que te vea', 0);
+
+-- Pregunta 75
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(75, 'Seguir muy pegado al coche de adelante y cambiar de carril bruscamente', 1),
+(75, 'Usar direccional al cambiar de carril', 0),
+(75, 'Respetar el límite de velocidad', 0),
+(75, 'Encender las luces en lluvia', 0);
+
+-- Pregunta 76
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(76, 'Dejar espacio lateral suficiente y rebasar con precaución', 1),
+(76, 'Tocar claxon para que se quite', 0),
+(76, 'Pasar lo más pegado posible', 0),
+(76, 'Cerrarles el paso para que no te rebasen', 0);
+
+-- Pregunta 77
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(77, 'Cederle el espacio cuando es seguro hacerlo', 1),
+(77, 'Acelerar para que no entre', 0),
+(77, 'Cerrar el hueco a propósito', 0),
+(77, 'Cambiarte de carril sin avisar', 0);
+
+-- Pregunta 78
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(78, 'Mantener calma y evitar conductas agresivas', 1),
+(78, 'Competir con otros autos para no dejarse ganar', 0),
+(78, 'Tocar el claxon constantemente', 0),
+(78, 'Gritar por la ventana', 0);
+
+-- Pregunta 79
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(79, 'Para tener tiempo de frenar suave si el de adelante se detiene', 1),
+(79, 'Para que otros se metan en medio', 0),
+(79, 'Para usar el celular sin riesgo', 0),
+(79, 'Para asustar al de adelante', 0);
+
+-- Pregunta 80
+INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
+(80, 'Usar direccionales, respetar pasos peatonales y no bloquear cruces', 1),
+(80, 'Cambiar carril sin avisar si tienes prisa', 0),
+(80, 'Pararte sobre la cebra peatonal en el alto', 0),
+(80, 'Pegarte al de enfrente para que avance', 0);
+

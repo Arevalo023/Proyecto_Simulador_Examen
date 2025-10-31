@@ -1,0 +1,175 @@
+use simulador_manejo;
+-- =====================================================
+-- 1. Tabla de usuarios / alumnos
+-- =====================================================
+CREATE TABLE estudiante (
+    matricula           INT PRIMARY KEY,
+    nombre              VARCHAR(30)    NOT NULL,
+    paterno             VARCHAR(30)    NOT NULL,
+    materno             VARCHAR(30)    NULL,
+    email               VARCHAR(50)    UNIQUE NOT NULL,
+    telefono            BIGINT         NULL,
+    contrasenia         VARCHAR(255)   NOT NULL,  -- aquí se guarda el hash (bcrypt), NO texto plano
+    rol                 ENUM('alumno','admin') DEFAULT 'alumno'
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- 2. Banco de imagenes para las preguntas
+-- =====================================================
+CREATE TABLE banco_imagenes (
+    codigo_imagen   INT PRIMARY KEY AUTO_INCREMENT,
+    ruta            VARCHAR(255) NOT NULL  -- ej: 'uploads/senial_stop.png'
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- 3. Banco maestro de preguntas
+--    - tipo_etiqueta_html: por si quieres render diferente ('T'=texto,'I'=imagen,...)
+--    - categoria_tema: para analytics en dashboard (ej 'senalizacion', 'alcohol', 'velocidad')
+-- =====================================================
+CREATE TABLE preguntas (
+    id_pregunta         INT PRIMARY KEY AUTO_INCREMENT,
+    codigo_imagen       INT NULL,
+    reactivo            VARCHAR(255) NOT NULL,         -- texto de la pregunta
+    tipo_etiqueta_html  CHAR(1)     NOT NULL DEFAULT 'T',
+    categoria_tema      VARCHAR(50) NULL,              -- opcional pero útil p/ dashboard
+
+    CONSTRAINT fk_pregunta_imagen
+        FOREIGN KEY (codigo_imagen)
+        REFERENCES banco_imagenes(codigo_imagen)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- 4. Respuestas posibles por cada pregunta (opción múltiple)
+--    - ok = 1 si es la correcta, 0 si es incorrecta
+-- =====================================================
+CREATE TABLE respuestas (
+    id_respuesta    INT PRIMARY KEY AUTO_INCREMENT,
+    id_pregunta     INT NOT NULL,
+    opcion          VARCHAR(200) NOT NULL,
+    ok              TINYINT(1)   NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_respuesta_pregunta
+        FOREIGN KEY (id_pregunta)
+        REFERENCES preguntas(id_pregunta)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- =====================================================
+-- 5. Intentos de examen del estudiante
+--    (esto es la versión mejorada de historial_estudiante)
+--
+--    tipo_test:
+--      'practica'  -> 20 preguntas, max 6 intentos
+--      'final'     -> 40 preguntas, max 3 intentos
+--
+--    calificacion:
+--      porcentaje final obtenido en ese intento (0.00 a 100.00)
+--
+--    aprobado:
+--      1 si calificacion >= 75
+--
+--    duracion_segundos_total:
+--      opcional para dashboard (cuánto tardó todo el examen)
+-- =====================================================
+CREATE TABLE intentos_examen (
+    id_intento               INT PRIMARY KEY AUTO_INCREMENT,
+    matricula                INT NOT NULL,
+    tipo_test                ENUM('practica','final') NOT NULL,
+    fecha_hora_realiza       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    calificacion             DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    aprobado                 TINYINT(1)   NOT NULL DEFAULT 0,
+    duracion_segundos_total  INT          NULL,
+
+    CONSTRAINT fk_intento_estudiante
+        FOREIGN KEY (matricula)
+        REFERENCES estudiante(matricula)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- INDEX extra útil para checar límites de intentos rápido:
+-- contar cuántos intentos tiene un alumno por tipo_test ('practica' o 'final')
+CREATE INDEX idx_intentos_por_usuario
+    ON intentos_examen (matricula, tipo_test);
+
+-- =====================================================
+-- 6. Respuestas del alumno dentro de un intento específico
+--    (esto es la versión corregida/extendida de examen_estudiante)
+--
+--    - Cada fila = "en el intento X, a la pregunta Y,
+--                   el alumno escogió la opción Z"
+--
+--    - id_respuesta_elegida referencia a respuestas.id_respuesta,
+--      así sabemos si fue correcta (JOIN y revisar 'ok')
+--
+--    - contestada_a_tiempo:
+--         1 = respondió dentro del minuto
+--         0 = se le acabó el tiempo -> cuenta como mala
+--
+--    - tiempo_respuesta_segundos:
+--         captura cuánto tardó. útil para dashboard, opcional.
+--
+--  Nota:
+--   UNIQUE(id_intento, id_pregunta) evita que una misma pregunta
+--   salga dos veces en el mismo examen (cumple “no repetir pregunta
+--   dentro de la misma prueba”).
+-- =====================================================
+CREATE TABLE examen_respuestas (
+    id_seleccion                 INT PRIMARY KEY AUTO_INCREMENT,
+    id_intento                   INT NOT NULL,
+    id_pregunta                  INT NOT NULL,
+    id_respuesta_elegida         INT NULL,
+    contestada_a_tiempo          TINYINT(1) NOT NULL DEFAULT 1,
+    tiempo_respuesta_segundos    INT NULL,
+
+    CONSTRAINT fk_detalle_intento
+        FOREIGN KEY (id_intento)
+        REFERENCES intentos_examen(id_intento)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_detalle_pregunta
+        FOREIGN KEY (id_pregunta)
+        REFERENCES preguntas(id_pregunta)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_detalle_respuesta
+        FOREIGN KEY (id_respuesta_elegida)
+        REFERENCES respuestas(id_respuesta)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+
+    CONSTRAINT uq_pregunta_por_intento
+        UNIQUE (id_intento, id_pregunta)
+) ENGINE=InnoDB;
+
+
+
+
+
+
+*****BORRAR AL CORRER SQL,!!!, INSERT PARA ADMIN/ALUMNO(cambiar valores)****
+use simulador_manejo;
+INSERT INTO estudiante (
+    matricula,
+    nombre,
+    paterno,
+    materno,
+    email,
+    telefono,
+    contrasenia,
+    rol
+) VALUES (
+    99999,
+    'Admin',
+    'Sistema',
+    'Principal',
+    'admin@example.com',
+    8441234567,
+    '$2b$12$enwxaXo3G362bVfzivFvM.vdjmUXCqRvoix91DefFp8qeCEm7nJCm',
+    'admin'
+);
