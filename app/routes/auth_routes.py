@@ -13,13 +13,12 @@ from app.models.exam_model import (
     obtener_historial_intentos
 )
 
-
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-# =========================
-# Rutas de debug/pruebas
-# =========================
+# -------------------------
+# Debug
+# -------------------------
 @auth_bp.route("/ping")
 def ping_auth():
     return jsonify({"msg": "auth ok"})
@@ -35,18 +34,12 @@ def test_db():
     })
 
 
-# =========================
-# Registro de alumno
-# =========================
-
+# -------------------------
+# Registro
+# -------------------------
 @auth_bp.route("/register", methods=["GET"])
 def register_form():
-    """
-    Muestra el formulario de registro de alumno.
-    Si ya hay sesion iniciada, lo mando a su home.
-    """
     if session.get("usuario_matricula"):
-        # ya logueado
         rol_actual = session.get("usuario_rol")
         if rol_actual == "admin":
             return redirect(url_for("auth.admin_dashboard"))
@@ -58,15 +51,6 @@ def register_form():
 
 @auth_bp.route("/register", methods=["POST"])
 def register_submit():
-    """
-    Procesa el registro de un nuevo alumno.
-    - valida campos obligatorios
-    - valida que matricula y email no existan
-    - hashea contraseña
-    - inserta
-    - redirige a login con flash success
-    """
-    # leer form
     matricula = request.form.get("matricula", "").strip()
     nombre = request.form.get("nombre", "").strip()
     paterno = request.form.get("paterno", "").strip()
@@ -76,27 +60,22 @@ def register_submit():
     password1 = request.form.get("password1", "").strip()
     password2 = request.form.get("password2", "").strip()
 
-    # validaciones basicas
     if not matricula or not nombre or not paterno or not email or not password1 or not password2:
         flash("Faltan campos obligatorios", "error")
         return redirect(url_for("auth.register_form"))
 
-    # contraseñas iguales?
     if password1 != password2:
         flash("Las contraseñas no coinciden", "error")
         return redirect(url_for("auth.register_form"))
 
-    # matricula numerica?
     if not matricula.isdigit():
         flash("La matricula debe ser numerica", "error")
         return redirect(url_for("auth.register_form"))
 
-    # telefono opcional: si viene y no es digitos, error
     if telefono and (not telefono.isdigit()):
         flash("El telefono debe ser numerico", "error")
         return redirect(url_for("auth.register_form"))
 
-    # checar duplicados
     if existe_matricula(matricula):
         flash("Esa matricula ya esta registrada", "error")
         return redirect(url_for("auth.register_form"))
@@ -105,7 +84,6 @@ def register_submit():
         flash("Ese correo ya esta registrado", "error")
         return redirect(url_for("auth.register_form"))
 
-    # insertar en BD
     ok = crear_estudiante(
         matricula=int(matricula),
         nombre=nombre,
@@ -114,46 +92,27 @@ def register_submit():
         email=email,
         telefono=int(telefono) if telefono else None,
         password_plano=password1,
-        rol="alumno"   # forzado alumno, no dejo crear admin desde aqui
+        rol="alumno"
     )
 
     if not ok:
         flash("No se pudo crear la cuenta, intenta de nuevo", "error")
         return redirect(url_for("auth.register_form"))
 
-    # éxito
     flash("Cuenta creada, ahora inicia sesion", "success")
     return redirect(url_for("auth.login_form"))
 
 
-    if ok:
-        return jsonify({"status": "created"})
-    else:
-        return jsonify({"status": "error"}), 400
-
-
-# =========================
+# -------------------------
 # Login / Logout
-# =========================
-
+# -------------------------
 @auth_bp.route("/login", methods=["GET"])
 def login_form():
-    """
-    Muestra la pantalla de login.
-    """
     return render_template("login.html")
 
 
 @auth_bp.route("/login", methods=["POST"])
 def login_submit():
-    """
-    Procesa el login.
-    1. Lee matricula y password del form
-    2. Valida contra la BD (bcrypt)
-    3. Si ok -> guarda info minima en session
-    4. Redirige segun rol
-    5. Si mal -> flash error y regresa al form
-    """
     matricula = request.form.get("matricula", "").strip()
     password = request.form.get("password", "").strip()
 
@@ -163,7 +122,6 @@ def login_submit():
         flash("Credenciales incorrectas", "error")
         return redirect(url_for("auth.login_form"))
 
-    # guardar sesion
     session["usuario_matricula"] = user["matricula"]
     session["usuario_nombre"] = user["nombre"]
     session["usuario_rol"] = user["rol"]
@@ -180,37 +138,40 @@ def login_submit():
 def logout():
     """
     Si el usuario intenta cerrar sesión en medio de un examen activo,
-    le mostramos una pagina de confirmacion en lugar de sacarlo de una.
+    le mostramos una pagina de confirmacion.
     """
-    # ¿tiene examen activo?
     examen_id = session.get("examen_actual_id")
     examen_tipo = session.get("examen_actual_tipo")
 
     if examen_id and examen_tipo:
-        # Todavía hay examen en progreso
-        # En lugar de cerrar sesión directo, pedimos confirmación
+        # aún hay examen en progreso
         return render_template(
             "logout_confirm.html",
             examen_tipo=examen_tipo
         )
 
-    # Si no hay examen activo, cerramos normal
     session.clear()
     flash("Sesion cerrada", "info")
     return redirect(url_for("auth.login_form"))
 
 
-# =========================
-# Vistas protegidas
-# =========================
+@auth_bp.route("/logout/force", methods=["POST"])
+def logout_force():
+    """
+    El alumno aceptó perder el intento.
+    Limpiamos la sesion completa.
+    (El intento ya queda en BD como usado.)
+    """
+    session.clear()
+    flash("Sesion cerrada. Este intento se consumio.", "info")
+    return redirect(url_for("auth.login_form"))
 
+
+# -------------------------
+# Admin Dashboard
+# -------------------------
 @auth_bp.route("/admin/dashboard")
 def admin_dashboard():
-    """
-    Pantalla solo para admin.
-    Aquí luego pondremos el dashboard de intentos.
-    """
-    # validacion rapida de rol
     if session.get("usuario_rol") != "admin":
         flash("Acceso denegado, necesitas rol admin", "error")
         return redirect(url_for("auth.login_form"))
@@ -223,30 +184,23 @@ def admin_dashboard():
     )
 
 
+# -------------------------
+# Home del alumno
+# -------------------------
 @auth_bp.route("/alumno/home")
 def alumno_home():
-    """
-    Pantalla del alumno normal.
-    Muestra:
-    - botones para iniciar examenes
-    - intentos usados / restantes
-    - historial de calificaciones
-    """
     if session.get("usuario_rol") not in ["alumno", "admin"]:
         flash("Inicia sesion primero", "error")
         return redirect(url_for("auth.login_form"))
 
     matricula = session.get("usuario_matricula")
 
-    # ----- Practica -----
-    usados_practica = contar_intentos(matricula, "practica")  # cuántos ya hizo
+    usados_practica = contar_intentos(matricula, "practica")
     limite_practica = 6
     restantes_practica = max(limite_practica - usados_practica, 0)
 
     historial_practica = obtener_historial_intentos(matricula, "practica")
-    # historial_practica es lista de dict: fecha_hora_realiza, calificacion, aprobado...
 
-    # ----- Final (lo dejamos listo aunque aun no implementes start_final) -----
     usados_final = contar_intentos(matricula, "final")
     limite_final = 3
     restantes_final = max(limite_final - usados_final, 0)
@@ -267,13 +221,3 @@ def alumno_home():
         restantes_final=restantes_final,
         historial_final=historial_final,
     )
-@auth_bp.route("/logout/force", methods=["POST"])
-def logout_force():
-    """
-    El alumno aceptó perder el intento.
-    Limpiamos la sesion completa.
-    OJO: NO borramos el intento de la BD. Eso ya cuenta.
-    """
-    session.clear()
-    flash("Sesion cerrada. Este intento se consumio.", "info")
-    return redirect(url_for("auth.login_form"))

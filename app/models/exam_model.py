@@ -4,7 +4,6 @@ from app.db import Db
 import random
 import time
 
-
 def contar_intentos(matricula, tipo_test):
     """
     Cuenta cuántos intentos tiene este alumno de un tipo ('practica' o 'final').
@@ -129,7 +128,12 @@ def registrar_preguntas_en_intento(id_intento, lista_preguntas):
         if cursor: cursor.close()
         if conn: conn.close()
 
+
 def obtener_estado_pregunta(id_intento, indice):
+    """
+    Regresa la pregunta #indice (0-based) del intento, con las opciones mezcladas.
+    También regresa total para que sepamos cuántas son.
+    """
     conn = None
     cursor = None
 
@@ -172,7 +176,6 @@ def obtener_estado_pregunta(id_intento, indice):
         cursor.execute(sql_resp, (id_pregunta,))
         opciones = cursor.fetchall()
 
-        import random
         random.shuffle(opciones)
 
         return {
@@ -181,7 +184,7 @@ def obtener_estado_pregunta(id_intento, indice):
             "pregunta": {
                 "id_pregunta": id_pregunta,
                 "texto": actual["reactivo"],
-                "imagen_ruta": actual["imagen_ruta"]  # <-- IMPORTANTE
+                "imagen_ruta": actual["imagen_ruta"]
             },
             "opciones": opciones
         }
@@ -245,10 +248,11 @@ def calcular_calificacion_y_cerrar_intento(id_intento, tipo_test):
         conn = Db.get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # 1. obtener todas las respuestas elegidas en este intento y ver si eran correctas
+        # 1. obtener todas las respuestas elegidas en este intento
         sql = """
             SELECT er.id_pregunta,
                    er.id_respuesta_elegida,
+                   er.contestada_a_tiempo,
                    r.ok
             FROM examen_respuestas er
             LEFT JOIN respuestas r
@@ -262,19 +266,18 @@ def calcular_calificacion_y_cerrar_intento(id_intento, tipo_test):
         total = len(rows)
 
         for row in rows:
-            # correcta si ok == 1 y sí contestó algo
-            if row["id_respuesta_elegida"] is not None and row["ok"] == 1:
+            # correcta si (eligio algo) && (ok=1) && (contestada a tiempo)
+            if row["id_respuesta_elegida"] is not None and row["ok"] == 1 and row["contestada_a_tiempo"] == 1:
                 correctas += 1
 
         # 2. ponderar según tipo_test
         if tipo_test == "practica":
-            # 5 puntos por reactivo correcto
             puntos = correctas * 5.0
         else:
-            # final -> 2.5 por reactivo correcto
+            # final
             puntos = correctas * 2.5
 
-        calificacion = puntos  # ya está en escala 0-100
+        calificacion = puntos  # ya 0-100
         aprobado = 1 if calificacion >= 75.0 else 0
 
         # 3. actualizar intento
@@ -303,6 +306,8 @@ def calcular_calificacion_y_cerrar_intento(id_intento, tipo_test):
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
+
 def obtener_historial_intentos(matricula, tipo_test):
     """
     Regresa lista de intentos de un alumno para un tipo de test ('practica' o 'final').

@@ -14,15 +14,13 @@
         <div style="margin-bottom:16px; text-align:center;">
             <img
                 src="{{ '/' ~ pregunta.imagen_ruta }}"
-
                 alt="imagen pregunta"
                 style="max-width:250px; max-height:250px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:#fff;"
             />
         </div>
     {% endif %}
 
-
-    <!-- NOTI DE TIEMPO AGOTADO (oculta al inicio) -->
+    <!-- NOTI DE TIEMPO AGOTADO -->
     <div id="time-expired-msg"
          class="flash-msg error"
          style="display:none; margin-bottom:16px; font-size:0.8rem;">
@@ -32,7 +30,7 @@
     <form method="POST" action="{{ url_for('exam.submit_answer') }}" id="answerForm">
         <input type="hidden" name="id_pregunta" value="{{ pregunta.id_pregunta }}"/>
 
-        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+        <div id="opcionesBlock" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
             {% for op in opciones %}
             <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; background:rgba(30,41,59,0.6); border:1px solid rgba(148,163,184,0.4); border-radius:8px; padding:10px 12px;">
                 <input
@@ -52,15 +50,69 @@
         <div class="card-desc" style="text-align:center; font-size:0.8rem; color:#93c5fd;">
             Tiempo restante: <span id="timeLeft">60</span> s
         </div>
-            <button
-                type="submit"
-                class="btn-primary full-width"
-                style="margin-top:16px; min-height:42px; display:flex; align-items:center; justify-content:center;"
-                id="btnResponder"
-            >
-                <span id="btnText">Responder y continuar</span>
-            </button>
+
+        <button
+            type="submit"
+            class="btn-primary full-width"
+            style="margin-top:16px; min-height:42px; display:flex; align-items:center; justify-content:center;"
+            id="btnResponder"
+        >
+            <span id="btnText">Responder y continuar</span>
+        </button>
     </form>
+
+    <!-- OVERLAY CONFIRMACION SIN RESPUESTA -->
+    <div id="sinRespuestaOverlay"
+         style="
+            display:none;
+            position:fixed;
+            left:0;top:0;width:100%;height:100vh;
+            background:rgba(0,0,0,0.6);
+            z-index:9999;
+            padding:16px;
+         "
+    >
+        <div style="
+            max-width:360px;
+            margin:80px auto 0 auto;
+            background:rgba(15,23,42,0.95);
+            border:1px solid rgba(255,255,255,0.15);
+            border-radius:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.8);
+            color:#f8fafc;
+            padding:20px;
+            font-size:0.9rem;
+            line-height:1.4rem;
+        ">
+            <div style="font-weight:600; font-size:1rem; color:#fff; margin-bottom:8px;">
+                ¿Continuar sin contestar?
+            </div>
+
+            <div style="color:#cbd5e1; font-size:0.85rem; margin-bottom:16px;">
+                No seleccionaste ninguna opción.<br>
+                Si continúas, esta pregunta se registrará como incorrecta.
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                <button
+                    id="confirmSinRespuesta"
+                    class="btn-primary full-width"
+                    style="flex:1 1 auto; min-width:120px; text-align:center;"
+                >
+                    Sí, continuar
+                </button>
+
+                <button
+                    id="cancelSinRespuesta"
+                    class="btn-secondary full-width"
+                    style="flex:1 1 auto; min-width:120px; text-align:center;"
+                >
+                    Volver a la pregunta
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- sonidos -->
@@ -79,46 +131,88 @@ const form = document.getElementById("answerForm");
 const btnResponder = document.getElementById("btnResponder");
 const btnText = document.getElementById("btnText");
 const msgTimeout = document.getElementById("time-expired-msg");
+
 const sndOK = document.getElementById("sound-ok");
 const sndTimeout = document.getElementById("sound-timeout");
 
-// Para bloquear múltiples submits
+const sinRespuestaOverlay = document.getElementById("sinRespuestaOverlay");
+const confirmSinRespuesta = document.getElementById("confirmSinRespuesta");
+const cancelSinRespuesta = document.getElementById("cancelSinRespuesta");
+
+// bloqueo múltiple
 let bloqueado = false;
 
-// --- CLICK MANUAL (usuario responde a tiempo) ---
+function hayOpcionMarcada() {
+    const radios = document.querySelectorAll('input[name="id_respuesta"]');
+    for (let r of radios) {
+        if (r.checked) return true;
+    }
+    return false;
+}
+
+function bloquearBotonYMarcar(texto, cursor) {
+    if (btnResponder) {
+        btnResponder.disabled = true;
+        btnResponder.style.opacity = "0.5";
+        btnResponder.style.cursor = cursor;
+    }
+    if (btnText) {
+        btnText.textContent = texto;
+    }
+}
+
+// click normal
 btnResponder.addEventListener("click", function(e) {
     if (bloqueado) {
         e.preventDefault();
         return;
     }
 
-    // detenemos submit inmediato
     e.preventDefault();
+
+    if (!hayOpcionMarcada()) {
+        // no seleccionó nada
+        sinRespuestaOverlay.style.display = "block";
+        return;
+    }
+
     bloqueado = true;
+    bloquearBotonYMarcar("Enviando respuesta...", "wait");
 
-    // Deshabilitar botón visualmente y cambiar texto
-    if (btnResponder) {
-        btnResponder.disabled = true;
-        btnResponder.style.opacity = "0.5";
-        btnResponder.style.cursor = "wait";
-    }
-    if (btnText) {
-        btnText.textContent = "Enviando respuesta...";
-    }
-
-    // reproducir sonido OK
     try {
         sndOK.currentTime = 0;
         sndOK.play();
     } catch(err) {}
 
-    // pequeño delay para que el sonido salga y el usuario vea el estado
     setTimeout(() => {
         form.submit();
     }, 400);
 });
 
-// --- COUNTDOWN / TIMEOUT AUTO ---
+// confirmar envio sin respuesta
+confirmSinRespuesta.addEventListener("click", function() {
+    if (bloqueado) return;
+    bloqueado = true;
+
+    sinRespuestaOverlay.style.display = "none";
+    bloquearBotonYMarcar("Enviando sin respuesta...", "wait");
+
+    try {
+        sndTimeout.currentTime = 0;
+        sndTimeout.play();
+    } catch(err) {}
+
+    setTimeout(() => {
+        form.submit(); // manda en blanco
+    }, 800);
+});
+
+// cancelar overlay
+cancelSinRespuesta.addEventListener("click", function() {
+    sinRespuestaOverlay.style.display = "none";
+});
+
+// countdown / timeout auto
 const tick = setInterval(() => {
     restante--;
     if (lbl) lbl.textContent = restante;
@@ -126,35 +220,24 @@ const tick = setInterval(() => {
     if (restante <= 0) {
         clearInterval(tick);
 
-        // mostramos alerta visual
+        // aviso visual
         if (msgTimeout) {
             msgTimeout.style.display = "block";
         }
 
-        // bloquear botón y cambiar texto también aquí
         bloqueado = true;
-        if (btnResponder) {
-            btnResponder.disabled = true;
-            btnResponder.style.opacity = "0.4";
-            btnResponder.style.cursor = "not-allowed";
-        }
-        if (btnText) {
-            btnText.textContent = "Tiempo agotado, enviando...";
-        }
+        bloquearBotonYMarcar("Tiempo agotado, enviando...", "not-allowed");
 
-        // sonido timeout
         try {
             sndTimeout.currentTime = 0;
             sndTimeout.play();
         } catch(err) {}
 
-        // damos más tiempito al sonido rojo
         setTimeout(() => {
             form.submit();
         }, 800);
     }
 }, 1000);
 </script>
-
 
 {% endblock %}

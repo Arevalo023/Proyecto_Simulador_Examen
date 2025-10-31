@@ -17,14 +17,9 @@ exam_bp = Blueprint("exam", __name__, url_prefix="/exam")
 
 
 # -----------------------
-# Helpers internos
+# Helper: validar sesión de alumno/admin
 # -----------------------
-
 def requiere_login_alumno():
-    """
-    Valida que haya sesion activa y que sea alumno o admin.
-    Regresa (matricula, rol) o (None, None) si no hay permiso.
-    """
     rol = session.get("usuario_rol")
     mat = session.get("usuario_matricula")
     if rol not in ["alumno", "admin"] or mat is None:
@@ -35,66 +30,103 @@ def requiere_login_alumno():
 # -----------------------
 # INICIAR EXAMEN PRACTICA
 # -----------------------
-
 @exam_bp.route("/start/practica")
 def start_practica():
     """
-    1. Checar login
-    2. Revisar limite de 6 intentos
-    3. Crear intento_examen tipo 'practica'
-    4. Seleccionar 20 preguntas random
-    5. Guardarlas en examen_respuestas
-    6. Guardar en session info de control (id_intento y timestamp inicio)
-    7. Redirigir a la primera pregunta
+    1. Valida login
+    2. Checa limite 6 intentos
+    3. Crea intento tipo 'practica'
+    4. Selecciona 20 preguntas aleatorias
+    5. Las registra en examen_respuestas
+    6. Guarda en session datos de control
+    7. Redirige a pregunta 0
     """
     matricula, rol = requiere_login_alumno()
     if matricula is None:
         flash("Inicia sesion primero", "error")
         return redirect(url_for("auth.login_form"))
 
-    # checar limite (6)
-    num_intentos = contar_intentos(matricula, "practica")
-    if num_intentos >= 6:
+    usados = contar_intentos(matricula, "practica")
+    if usados >= 6:
         flash("Ya usaste tus 6 intentos de practica", "error")
         return redirect(url_for("auth.alumno_home"))
 
-    # crear intento
     id_intento = crear_intento(matricula, "practica")
     if id_intento is None:
-        flash("No se pudo crear el intento", "error")
+        flash("No se pudo crear el intento de practica", "error")
         return redirect(url_for("auth.alumno_home"))
 
-    # seleccionar 20 preguntas aleatorias
     preguntas = seleccionar_preguntas_aleatorias(20)
-
     if len(preguntas) < 20:
-        flash("No hay suficientes preguntas en el banco (se necesitan 20)", "error")
+        flash("No hay suficientes preguntas (necesitamos 20)", "error")
         return redirect(url_for("auth.alumno_home"))
 
     ok = registrar_preguntas_en_intento(id_intento, preguntas)
     if not ok:
-        flash("Error al preparar el examen", "error")
+        flash("Error al preparar preguntas de practica", "error")
         return redirect(url_for("auth.alumno_home"))
 
-    # guardamos en session el tracking de este examen
     session["examen_actual_id"] = id_intento
     session["examen_actual_tipo"] = "practica"
     session["examen_inicio_ts"] = time.time()
 
-    # primera pregunta (index 0)
+    # primera pregunta
+    return redirect(url_for("exam.show_question", index=0))
+
+
+# -----------------------
+# INICIAR EXAMEN FINAL
+# -----------------------
+@exam_bp.route("/start/final")
+def start_final():
+    """
+    Igual que practica pero:
+    - límite 3 intentos
+    - 40 preguntas
+    - tipo_test 'final'
+    """
+    matricula, rol = requiere_login_alumno()
+    if matricula is None:
+        flash("Inicia sesion primero", "error")
+        return redirect(url_for("auth.login_form"))
+
+    usados = contar_intentos(matricula, "final")
+    if usados >= 3:
+        flash("Ya usaste tus 3 intentos del examen final", "error")
+        return redirect(url_for("auth.alumno_home"))
+
+    id_intento = crear_intento(matricula, "final")
+    if id_intento is None:
+        flash("No se pudo crear el intento final", "error")
+        return redirect(url_for("auth.alumno_home"))
+
+    preguntas = seleccionar_preguntas_aleatorias(40)
+    if len(preguntas) < 40:
+        flash("No hay suficientes preguntas (necesitamos 40)", "error")
+        return redirect(url_for("auth.alumno_home"))
+
+    ok = registrar_preguntas_en_intento(id_intento, preguntas)
+    if not ok:
+        flash("Error al preparar preguntas del examen final", "error")
+        return redirect(url_for("auth.alumno_home"))
+
+    session["examen_actual_id"] = id_intento
+    session["examen_actual_tipo"] = "final"
+    session["examen_inicio_ts"] = time.time()
+
     return redirect(url_for("exam.show_question", index=0))
 
 
 # -----------------------
 # MOSTRAR PREGUNTA N
 # -----------------------
-
 @exam_bp.route("/question/<int:index>", methods=["GET"])
 def show_question(index):
-    """
-    Muestra la pregunta #index del examen actual en session.
-    Renderiza template exam_question.html
-    """
+    matricula, rol = requiere_login_alumno()
+    if matricula is None:
+        flash("Inicia sesion primero", "error")
+        return redirect(url_for("auth.login_form"))
+
     id_intento = session.get("examen_actual_id")
     tipo_test = session.get("examen_actual_tipo")
 
@@ -104,10 +136,10 @@ def show_question(index):
 
     estado = obtener_estado_pregunta(id_intento, index)
     if estado is None:
-        # index fuera de rango -> significa que ya no hay mas preguntas
+        # ya no hay más preguntas -> terminar examen
         return redirect(url_for("exam.finish_exam"))
 
-    # timestamp de inicio de ESTA pregunta para controlar el minuto
+    # guardamos marca de tiempo de ESTA pregunta
     session["pregunta_start_ts"] = time.time()
     session["pregunta_index"] = index
 
@@ -125,16 +157,13 @@ def show_question(index):
 # -----------------------
 # RECIBIR RESPUESTA
 # -----------------------
-
 @exam_bp.route("/answer", methods=["POST"])
 def submit_answer():
-    """
-    Procesa la respuesta de la pregunta actual:
-    - lee id_pregunta y id_respuesta_elegida del form
-    - calcula si se contesto dentro de 60s
-    - guarda en examen_respuestas
-    - redirige a la siguiente pregunta
-    """
+    matricula, rol = requiere_login_alumno()
+    if matricula is None:
+        flash("Inicia sesion primero", "error")
+        return redirect(url_for("auth.login_form"))
+
     id_intento = session.get("examen_actual_id")
     tipo_test = session.get("examen_actual_tipo")
     index_actual = session.get("pregunta_index", 0)
@@ -144,19 +173,14 @@ def submit_answer():
         flash("No tienes un examen activo", "error")
         return redirect(url_for("auth.alumno_home"))
 
-    # leer lo que viene del form
     id_pregunta = request.form.get("id_pregunta")
-    id_respuesta_elegida = request.form.get("id_respuesta")
-    # si el alumno no marcó nada, id_respuesta_elegida será None -> cuenta como mala
+    id_respuesta_elegida = request.form.get("id_respuesta")  # puede venir vacio
 
-    # calcular tiempo
     ahora = time.time()
     elapsed = int(ahora - ts_inicio)
 
-    # contestó a tiempo?
     contesto_a_tiempo = (elapsed <= 60)
 
-    # guardar en BD
     guardar_respuesta_de_pregunta(
         id_intento=id_intento,
         id_pregunta=id_pregunta,
@@ -165,7 +189,6 @@ def submit_answer():
         tiempo_seg=elapsed
     )
 
-    # siguiente pregunta
     siguiente = int(index_actual) + 1
     return redirect(url_for("exam.show_question", index=siguiente))
 
@@ -173,13 +196,13 @@ def submit_answer():
 # -----------------------
 # TERMINAR EXAMEN
 # -----------------------
-
 @exam_bp.route("/finish")
 def finish_exam():
-    """
-    Calcula la calificacion final, marca aprobado o no, limpia session parcial
-    y muestra la pantalla de resultado.
-    """
+    matricula, rol = requiere_login_alumno()
+    if matricula is None:
+        flash("Inicia sesion primero", "error")
+        return redirect(url_for("auth.login_form"))
+
     id_intento = session.get("examen_actual_id")
     tipo_test = session.get("examen_actual_tipo")
 
@@ -189,7 +212,7 @@ def finish_exam():
 
     resultado = calcular_calificacion_y_cerrar_intento(id_intento, tipo_test)
 
-    # limpiar datos de examen en session para que no reusen
+    # limpiar sesión de examen activo
     session.pop("examen_actual_id", None)
     session.pop("examen_actual_tipo", None)
     session.pop("examen_inicio_ts", None)
