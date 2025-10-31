@@ -4,8 +4,11 @@ from flask import Blueprint, jsonify, request, render_template, redirect, url_fo
 from app.models.estudiante_model import (
     obtener_todos_estudiantes,
     crear_estudiante,
-    validar_login
+    validar_login,
+    existe_matricula,
+    existe_email
 )
+
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -28,18 +31,96 @@ def test_db():
     })
 
 
-@auth_bp.route("/register-demo")
-def register_demo():
+# =========================
+# Registro de alumno
+# =========================
+
+@auth_bp.route("/register", methods=["GET"])
+def register_form():
+    """
+    Muestra el formulario de registro de alumno.
+    Si ya hay sesion iniciada, lo mando a su home.
+    """
+    if session.get("usuario_matricula"):
+        # ya logueado
+        rol_actual = session.get("usuario_rol")
+        if rol_actual == "admin":
+            return redirect(url_for("auth.admin_dashboard"))
+        else:
+            return redirect(url_for("auth.alumno_home"))
+
+    return render_template("register.html")
+
+
+@auth_bp.route("/register", methods=["POST"])
+def register_submit():
+    """
+    Procesa el registro de un nuevo alumno.
+    - valida campos obligatorios
+    - valida que matricula y email no existan
+    - hashea contraseña
+    - inserta
+    - redirige a login con flash success
+    """
+    # leer form
+    matricula = request.form.get("matricula", "").strip()
+    nombre = request.form.get("nombre", "").strip()
+    paterno = request.form.get("paterno", "").strip()
+    materno = request.form.get("materno", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    telefono = request.form.get("telefono", "").strip()
+    password1 = request.form.get("password1", "").strip()
+    password2 = request.form.get("password2", "").strip()
+
+    # validaciones basicas
+    if not matricula or not nombre or not paterno or not email or not password1 or not password2:
+        flash("Faltan campos obligatorios", "error")
+        return redirect(url_for("auth.register_form"))
+
+    # contraseñas iguales?
+    if password1 != password2:
+        flash("Las contraseñas no coinciden", "error")
+        return redirect(url_for("auth.register_form"))
+
+    # matricula numerica?
+    if not matricula.isdigit():
+        flash("La matricula debe ser numerica", "error")
+        return redirect(url_for("auth.register_form"))
+
+    # telefono opcional: si viene y no es digitos, error
+    if telefono and (not telefono.isdigit()):
+        flash("El telefono debe ser numerico", "error")
+        return redirect(url_for("auth.register_form"))
+
+    # checar duplicados
+    if existe_matricula(matricula):
+        flash("Esa matricula ya esta registrada", "error")
+        return redirect(url_for("auth.register_form"))
+
+    if existe_email(email):
+        flash("Ese correo ya esta registrado", "error")
+        return redirect(url_for("auth.register_form"))
+
+    # insertar en BD
     ok = crear_estudiante(
-        matricula=12345,
-        nombre="Admin",
-        paterno="Principal",
-        materno="",
-        email="Admin@example.com",
-        telefono=1234567890,
-        password_plano="abc123",
-        rol="admin"          # si quieres que tu usuario sea admin cámbialo aquí
+        matricula=int(matricula),
+        nombre=nombre,
+        paterno=paterno,
+        materno=materno,
+        email=email,
+        telefono=int(telefono) if telefono else None,
+        password_plano=password1,
+        rol="alumno"   # forzado alumno, no dejo crear admin desde aqui
     )
+
+    if not ok:
+        flash("No se pudo crear la cuenta, intenta de nuevo", "error")
+        return redirect(url_for("auth.register_form"))
+
+    # éxito
+    flash("Cuenta creada, ahora inicia sesion", "success")
+    return redirect(url_for("auth.login_form"))
+
 
     if ok:
         return jsonify({"status": "created"})

@@ -82,11 +82,11 @@ def crear_estudiante(matricula, nombre, paterno, materno, email, telefono, passw
         if conn is not None:
             conn.close()
 
-
 def obtener_por_matricula(matricula):
     """
     Trae todos los datos de un estudiante por matricula.
     Regresa dict o None.
+    Incluye contrasenia y rol para poder validar login.
     """
     conn = None
     cursor = None
@@ -95,7 +95,14 @@ def obtener_por_matricula(matricula):
         cursor = conn.cursor(dictionary=True)
 
         query = """
-            SELECT matricula, nombre, paterno, contrasenia, rol
+            SELECT matricula,
+                   nombre,
+                   paterno,
+                   materno,
+                   email,
+                   telefono,
+                   contrasenia,
+                   rol
             FROM estudiante
             WHERE matricula = %s
             LIMIT 1;
@@ -140,3 +147,51 @@ def validar_login(matricula, password_plano):
         "paterno": usuario["paterno"],
         "rol": usuario["rol"]
     }
+def existe_matricula(matricula):
+    """
+    True si ya existe esa matricula en la tabla estudiante.
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = Db.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT 1 FROM estudiante WHERE matricula = %s LIMIT 1;", (matricula,))
+        row = cursor.fetchone()
+        return row is not None
+
+    except Exception as e:
+        print("Error en existe_matricula:", e)
+        return False  # si truena, regresamos False para no bloquear registro por error raro
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
+
+
+def existe_email(email):
+    """
+    True si ya existe ese email en la tabla estudiante.
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = Db.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT 1 FROM estudiante WHERE email = %s LIMIT 1;", (email,))
+        row = cursor.fetchone()
+        return row is not None
+
+    except Exception as e:
+        print("Error en existe_email:", e)
+        return False
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()

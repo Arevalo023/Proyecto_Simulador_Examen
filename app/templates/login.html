@@ -3,6 +3,12 @@
 
 <div class="card card-login">
     <h2 class="card-title">Iniciar sesión</h2>
+<p class="hint">
+    ¿No tienes cuenta?<br>
+    <a href="{{ url_for('auth.register_form') }}" style="color:#93c5fd; text-decoration:underline;">
+        Crear cuenta nueva
+    </a>
+</p>
 
     <form method="POST" action="{{ url_for('auth.login_submit') }}">
         <div class="form-group">
