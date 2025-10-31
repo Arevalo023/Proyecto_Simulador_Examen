@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card card-login">
+    <h2 class="card-title">¿Seguro que quieres salir?</h2>
+
+    <p class="card-desc" style="margin-bottom:16px;">
+        Estás en medio de un examen de 
+        {% if examen_tipo == "practica" %}práctica{% else %}evaluación final{% endif %}.
+        Si cierras sesión ahora, este intento contará como usado.
+    </p>
+
+    <form method="POST" action="{{ url_for('auth.logout_force') }}">
+        <button type="submit" class="btn-primary full-width" style="margin-bottom:12px;">
+            Sí, cerrar sesión y perder este intento
+        </button>
+    </form>
+
+    <a class="btn-secondary full-width" href="{{ url_for('exam.show_question', index=session.get('pregunta_index', 0) or 0) }}">
+        Volver al examen
+    </a>
+</div>
+
+{% endblock %}

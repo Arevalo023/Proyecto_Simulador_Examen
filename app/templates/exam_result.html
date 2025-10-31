@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <h2 class="card-title">Resultado - {{ "Práctica" if tipo_test == "practica" else "Examen Final" }}</h2>
+
+    <p class="card-desc">
+        Preguntas totales: {{ total_preguntas }}<br>
+        Contestaste bien: {{ correctas }}<br>
+        Calificacion final: {{ "%.2f"|format(calificacion) }} %
+    </p>
+
+    {% if aprobado == 1 %}
+        <div class="flash-msg success" style="margin-top:16px;">
+            Aprobado ✅
+        </div>
+    {% else %}
+        <div class="flash-msg error" style="margin-top:16px;">
+            No aprobado ❌
+        </div>
+    {% endif %}
+
+    <div class="actions-row" style="margin-top:24px;">
+        <a class="btn-primary full-width" href="{{ url_for('auth.alumno_home') }}">
+            Volver al inicio alumno
+        </a>
+    </div>
+</div>
+
+{% endblock %}

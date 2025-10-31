@@ -8,6 +8,10 @@ from app.models.estudiante_model import (
     existe_matricula,
     existe_email
 )
+from app.models.exam_model import (
+    contar_intentos,
+    obtener_historial_intentos
+)
 
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -175,8 +179,22 @@ def login_submit():
 @auth_bp.route("/logout")
 def logout():
     """
-    Limpia la sesion.
+    Si el usuario intenta cerrar sesión en medio de un examen activo,
+    le mostramos una pagina de confirmacion en lugar de sacarlo de una.
     """
+    # ¿tiene examen activo?
+    examen_id = session.get("examen_actual_id")
+    examen_tipo = session.get("examen_actual_tipo")
+
+    if examen_id and examen_tipo:
+        # Todavía hay examen en progreso
+        # En lugar de cerrar sesión directo, pedimos confirmación
+        return render_template(
+            "logout_confirm.html",
+            examen_tipo=examen_tipo
+        )
+
+    # Si no hay examen activo, cerramos normal
     session.clear()
     flash("Sesion cerrada", "info")
     return redirect(url_for("auth.login_form"))
@@ -209,14 +227,53 @@ def admin_dashboard():
 def alumno_home():
     """
     Pantalla del alumno normal.
+    Muestra:
+    - botones para iniciar examenes
+    - intentos usados / restantes
+    - historial de calificaciones
     """
     if session.get("usuario_rol") not in ["alumno", "admin"]:
         flash("Inicia sesion primero", "error")
         return redirect(url_for("auth.login_form"))
 
+    matricula = session.get("usuario_matricula")
+
+    # ----- Practica -----
+    usados_practica = contar_intentos(matricula, "practica")  # cuántos ya hizo
+    limite_practica = 6
+    restantes_practica = max(limite_practica - usados_practica, 0)
+
+    historial_practica = obtener_historial_intentos(matricula, "practica")
+    # historial_practica es lista de dict: fecha_hora_realiza, calificacion, aprobado...
+
+    # ----- Final (lo dejamos listo aunque aun no implementes start_final) -----
+    usados_final = contar_intentos(matricula, "final")
+    limite_final = 3
+    restantes_final = max(limite_final - usados_final, 0)
+
+    historial_final = obtener_historial_intentos(matricula, "final")
+
     return render_template(
         "alumno_home.html",
         nombre=session.get("usuario_nombre"),
-        matricula=session.get("usuario_matricula"),
-        rol=session.get("usuario_rol")
+        matricula=matricula,
+        rol=session.get("usuario_rol"),
+
+        usados_practica=usados_practica,
+        restantes_practica=restantes_practica,
+        historial_practica=historial_practica,
+
+        usados_final=usados_final,
+        restantes_final=restantes_final,
+        historial_final=historial_final,
     )
+@auth_bp.route("/logout/force", methods=["POST"])
+def logout_force():
+    """
+    El alumno aceptó perder el intento.
+    Limpiamos la sesion completa.
+    OJO: NO borramos el intento de la BD. Eso ya cuenta.
+    """
+    session.clear()
+    flash("Sesion cerrada. Este intento se consumio.", "info")
+    return redirect(url_for("auth.login_form"))

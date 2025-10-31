@@ -4,18 +4,111 @@
 <div class="card">
     <h2 class="card-title">Bienvenido</h2>
     <p class="card-desc">
-        Hola {{ nombre }} 👋
+        Hola {{ nombre }}
     </p>
 
-    <p class="card-desc">
-        Desde aquí vas a poder iniciar el simulador de práctica (20 preguntas, 1 min c/u),
-        y el simulador final.
+    <p class="card-desc" style="margin-bottom: 12px;">
+        Aquí puedes hacer tu simulador de práctica (20 preguntas, 1 minuto por pregunta)
+        y luego el simulador final.
     </p>
 
-    <div class="actions-row">
-        <a class="btn-primary" href="#">Iniciar práctica</a>
-        <a class="btn-secondary" href="#">Iniciar examen final</a>
+    <!-- Estado de práctica -->
+    <div class="card-desc" style="font-size:0.8rem; line-height:1.2rem; color:#93c5fd;">
+        <strong>Práctica:</strong><br>
+        Intentos usados: {{ usados_practica }} / 6<br>
+        Intentos restantes: {{ restantes_practica }}
     </div>
+
+    <!-- Estado de final -->
+    <div class="card-desc" style="font-size:0.8rem; line-height:1.2rem; color:#93c5fd; margin-top:8px;">
+        <strong>Examen final:</strong><br>
+        Intentos usados: {{ usados_final }} / 3<br>
+        Intentos restantes: {{ restantes_final }}
+    </div>
+
+    <div class="actions-row" style="margin-top:16px;">
+        {% if restantes_practica > 0 %}
+            <a class="btn-primary" href="{{ url_for('exam.start_practica') }}">Iniciar práctica</a>
+        {% else %}
+            <button class="btn-primary" style="opacity:0.4; cursor:not-allowed;" disabled>
+                Sin intentos de práctica
+            </button>
+        {% endif %}
+
+        <a class="btn-secondary" href="#">
+            Iniciar examen final
+        </a>
+    </div>
+</div>
+
+
+<!-- Historial de práctica -->
+<div class="card">
+    <h2 class="card-title">Historial de práctica</h2>
+
+    {% if historial_practica and historial_practica|length > 0 %}
+        <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.2rem;">
+            {% for intento in historial_practica %}
+                <div style="border:1px solid rgba(148,163,184,0.3); border-radius:8px; padding:10px 12px; margin-bottom:8px; background:rgba(30,41,59,0.4);">
+                    <div>
+                        <strong>Fecha:</strong>
+                        {{ intento.fecha_hora_realiza }}
+                    </div>
+                    <div>
+                        <strong>Calificación:</strong>
+                        {{ "%.2f"|format(intento.calificacion) }}%
+                    </div>
+                    <div>
+                        <strong>Resultado:</strong>
+                        {% if intento.aprobado == 1 %}
+                            <span style="color:#6ee7b7;">Aprobado</span>
+                        {% else %}
+                            <span style="color:#fecaca;">No aprobado</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="card-desc">
+            Aún no has hecho intentos de práctica.
+        </p>
+    {% endif %}
+</div>
+
+
+<!-- Historial de examen final -->
+<div class="card">
+    <h2 class="card-title">Historial de examen final</h2>
+
+    {% if historial_final and historial_final|length > 0 %}
+        <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.2rem;">
+            {% for intento in historial_final %}
+                <div style="border:1px solid rgba(148,163,184,0.3); border-radius:8px; padding:10px 12px; margin-bottom:8px; background:rgba(30,41,59,0.4);">
+                    <div>
+                        <strong>Fecha:</strong>
+                        {{ intento.fecha_hora_realiza }}
+                    </div>
+                    <div>
+                        <strong>Calificación:</strong>
+                        {{ "%.2f"|format(intento.calificacion) }}%
+                    </div>
+                    <div>
+                        <strong>Resultado:</strong>
+                        {% if intento.aprobado == 1 %}
+                            <span style="color:#6ee7b7;">Aprobado</span>
+                        {% else %}
+                            <span style="color:#fecaca;">No aprobado</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="card-desc">
+            Aún no has hecho intentos finales.
+        </p>
+    {% endif %}
 </div>
 
 {% endblock %}

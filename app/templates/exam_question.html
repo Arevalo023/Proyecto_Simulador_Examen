@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <h2 class="card-title">
+        Pregunta {{ index_actual + 1 }} / {{ total }}
+    </h2>
+
+    <p class="card-desc" style="margin-bottom:16px;">
+        {{ pregunta.texto }}
+    </p>
+
+    {% if pregunta.imagen_ruta %}
+        <div style="margin-bottom:16px; text-align:center;">
+            <img
+                src="{{ '/' ~ pregunta.imagen_ruta }}"
+
+                alt="imagen pregunta"
+                style="max-width:250px; max-height:250px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:#fff;"
+            />
+        </div>
+    {% endif %}
+
+
+    <!-- NOTI DE TIEMPO AGOTADO (oculta al inicio) -->
+    <div id="time-expired-msg"
+         class="flash-msg error"
+         style="display:none; margin-bottom:16px; font-size:0.8rem;">
+        Tiempo agotado. Esta pregunta contará como incorrecta.
+    </div>
+
+    <form method="POST" action="{{ url_for('exam.submit_answer') }}" id="answerForm">
+        <input type="hidden" name="id_pregunta" value="{{ pregunta.id_pregunta }}"/>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+            {% for op in opciones %}
+            <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; background:rgba(30,41,59,0.6); border:1px solid rgba(148,163,184,0.4); border-radius:8px; padding:10px 12px;">
+                <input
+                    type="radio"
+                    name="id_respuesta"
+                    value="{{ op.id_respuesta }}"
+                    style="margin-top:4px;"
+                />
+                <span style="font-size:0.9rem; color:#f8fafc; line-height:1.3rem;">
+                    {{ op.opcion }}
+                </span>
+            </label>
+            {% endfor %}
+        </div>
+
+        <!-- contador -->
+        <div class="card-desc" style="text-align:center; font-size:0.8rem; color:#93c5fd;">
+            Tiempo restante: <span id="timeLeft">60</span> s
+        </div>
+            <button
+                type="submit"
+                class="btn-primary full-width"
+                style="margin-top:16px; min-height:42px; display:flex; align-items:center; justify-content:center;"
+                id="btnResponder"
+            >
+                <span id="btnText">Responder y continuar</span>
+            </button>
+    </form>
+</div>
+
+<!-- sonidos -->
+<audio id="sound-ok" preload="auto">
+    <source src="{{ url_for('static', filename='js/snd_ok.mp3') }}" type="audio/mpeg">
+</audio>
+
+<audio id="sound-timeout" preload="auto">
+    <source src="{{ url_for('static', filename='js/snd_timeout.mp3') }}" type="audio/mpeg">
+</audio>
+
+<script>
+let restante = 60;
+const lbl = document.getElementById("timeLeft");
+const form = document.getElementById("answerForm");
+const btnResponder = document.getElementById("btnResponder");
+const btnText = document.getElementById("btnText");
+const msgTimeout = document.getElementById("time-expired-msg");
+const sndOK = document.getElementById("sound-ok");
+const sndTimeout = document.getElementById("sound-timeout");
+
+// Para bloquear múltiples submits
+let bloqueado = false;
+
+// --- CLICK MANUAL (usuario responde a tiempo) ---
+btnResponder.addEventListener("click", function(e) {
+    if (bloqueado) {
+        e.preventDefault();
+        return;
+    }
+
+    // detenemos submit inmediato
+    e.preventDefault();
+    bloqueado = true;
+
+    // Deshabilitar botón visualmente y cambiar texto
+    if (btnResponder) {
+        btnResponder.disabled = true;
+        btnResponder.style.opacity = "0.5";
+        btnResponder.style.cursor = "wait";
+    }
+    if (btnText) {
+        btnText.textContent = "Enviando respuesta...";
+    }
+
+    // reproducir sonido OK
+    try {
+        sndOK.currentTime = 0;
+        sndOK.play();
+    } catch(err) {}
+
+    // pequeño delay para que el sonido salga y el usuario vea el estado
+    setTimeout(() => {
+        form.submit();
+    }, 400);
+});
+
+// --- COUNTDOWN / TIMEOUT AUTO ---
+const tick = setInterval(() => {
+    restante--;
+    if (lbl) lbl.textContent = restante;
+
+    if (restante <= 0) {
+        clearInterval(tick);
+
+        // mostramos alerta visual
+        if (msgTimeout) {
+            msgTimeout.style.display = "block";
+        }
+
+        // bloquear botón y cambiar texto también aquí
+        bloqueado = true;
+        if (btnResponder) {
+            btnResponder.disabled = true;
+            btnResponder.style.opacity = "0.4";
+            btnResponder.style.cursor = "not-allowed";
+        }
+        if (btnText) {
+            btnText.textContent = "Tiempo agotado, enviando...";
+        }
+
+        // sonido timeout
+        try {
+            sndTimeout.currentTime = 0;
+            sndTimeout.play();
+        } catch(err) {}
+
+        // damos más tiempito al sonido rojo
+        setTimeout(() => {
+            form.submit();
+        }, 800);
+    }
+}, 1000);
+</script>
+
+
+{% endblock %}
