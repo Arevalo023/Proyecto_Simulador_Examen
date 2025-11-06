@@ -1,11 +1,5 @@
-
-
-----------------POBLAR DATOS DE PREGUNTAS-------------------
-
 USE simulador_manejo;
--- ===============================================
--- 🔸 1. Banco de imágenes para señalización vial
--- ===============================================
+
 INSERT INTO banco_imagenes (ruta) VALUES
 ('static/img/senales/linea_amarilla.png'),
 ('static/img/senales/senal_alto.png'),
@@ -19,9 +13,7 @@ INSERT INTO banco_imagenes (ruta) VALUES
 ('static/img/senales/senal_peligro.png');
 
 
--- =============================
---  Preguntas: Señalización vial
--- =============================
+
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (1, '¿Qué indica una línea amarilla continua en el centro de la vía?', 'I', 'señalización'),
 (2, '¿Qué significa la señal de la imagen?', 'I', 'señalización'),
@@ -190,8 +182,6 @@ INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
 (20, 'El que toca más fuerte el claxon', 0),
 (20, 'El más grande o pesado (camión, tráiler, etc.)', 0);
 
-USE simulador_manejo;
-
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (NULL, '¿Cuál es el límite de velocidad típico en una zona escolar cuando hay estudiantes presentes?', 'T', 'velocidad'),
 (NULL, '¿Qué debes hacer si las condiciones de lluvia reducen tu visibilidad?', 'T', 'velocidad'),
@@ -274,9 +264,6 @@ INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
 (30, 'Solo aplica a motocicletas', 0);
 
 
------------------------------
-
-USE simulador_manejo;
 
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (NULL, '¿Cuál es uno de los primeros efectos del alcohol al conducir?', 'T', 'alcohol'),
@@ -360,10 +347,6 @@ INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
 (40, 'Conducir con música alta', 0),
 (40, 'Conducir con más de dos pasajeros', 0),
 (40, 'Conducir usando lentes de sol', 0);
-
-------------------------------
-
-USE simulador_manejo;
 
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (NULL, '¿Qué documento debes portar SIEMPRE para poder manejar legalmente?', 'T', 'documentacion'),
@@ -457,13 +440,7 @@ INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
 (50, 'La persona más grande de edad en el carro', 0),
 (50, 'El pasajero que no haya tomado alcohol', 0);
 
----------------------------------------
 
-USE simulador_manejo;
-
--- =============================
--- 🔹 Preguntas: Autoridad vial
--- =============================
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (NULL, '¿Quién tiene la autoridad para aplicar sanciones de tránsito?', 'T', 'autoridad_vial'),
 (NULL, 'Si un agente de tránsito te indica detenerte, tú debes:', 'T', 'autoridad_vial'),
@@ -544,13 +521,8 @@ INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
 (60, 'Motocicletas deportivas', 0),
 (60, 'Vehículos particulares de color rojo', 0),
 (60, 'Vehículos con permiso temporal', 0);
-------------------------------
 
-USE simulador_manejo;
 
--- =============================
--- 🔹 Preguntas: Mecánica básica
--- =============================
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (NULL, '¿Qué debes hacer si en el tablero se enciende la luz de aceite del motor?', 'T', 'mecanica_basica'),
 (NULL, '¿Qué indica que un vehículo está sobrecalentado?', 'T', 'mecanica_basica'),
@@ -633,8 +605,6 @@ INSERT INTO respuestas (id_pregunta, opcion, ok) VALUES
 (70, 'Porque hacen ruido si están bajos', 0),
 (70, 'Porque es requisito de tránsito', 0);
 
-----------------------------
-USE simulador_manejo;
 
 INSERT INTO preguntas (codigo_imagen, reactivo, tipo_etiqueta_html, categoria_tema) VALUES
 (NULL, 'En un cruce peatonal, ¿quién tiene prioridad de paso?', 'T', 'educacion_vial'),
