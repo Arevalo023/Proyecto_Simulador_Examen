@@ -10,7 +10,8 @@ from app.models.exam_model import (
     registrar_preguntas_en_intento,
     obtener_estado_pregunta,
     guardar_respuesta_de_pregunta,
-    calcular_calificacion_y_cerrar_intento
+    calcular_calificacion_y_cerrar_intento,
+    obtener_detalle_intento
 )
 
 exam_bp = Blueprint("exam", __name__, url_prefix="/exam")
@@ -136,7 +137,7 @@ def show_question(index):
 
     estado = obtener_estado_pregunta(id_intento, index)
     if estado is None:
-        # ya no hay más preguntas -> terminar examen
+        # ya no hay más preguntas - terminar examen
         return redirect(url_for("exam.finish_exam"))
 
     # guardamos marca de tiempo de ESTA pregunta
@@ -231,3 +232,40 @@ def finish_exam():
         calificacion=resultado["calificacion"],
         aprobado=resultado["aprobado"]
     )
+
+# -----------------------
+# REVISAR DETALLE DE UN INTENTO
+# -----------------------
+@exam_bp.route("/review/<int:id_intento>")
+def review_attempt(id_intento):
+    """
+    Muestra la revisión completa de un intento:
+    - Datos generales (fecha, calificación, aprobado)
+    - Lista de preguntas con:
+        * texto
+        * imagen
+        * opción correcta
+        * opción elegida
+        * indicador correcta/incorrecta
+        * si fue fuera de tiempo
+    Solo permite ver intentos del propio alumno.
+    """
+    matricula, rol = requiere_login_alumno()
+    if matricula is None:
+        flash("Inicia sesion primero", "error")
+        return redirect(url_for("auth.login_form"))
+
+    detalle = obtener_detalle_intento(id_intento, matricula=matricula)
+    if not detalle:
+        flash("No se encontró el intento o no te pertenece", "error")
+        return redirect(url_for("auth.alumno_home"))
+
+    intento = detalle["intento"]
+    preguntas = detalle["preguntas"]
+
+    return render_template(
+        "exam_review.html",
+        intento=intento,
+        preguntas=preguntas
+    )
+

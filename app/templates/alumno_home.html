@@ -46,15 +46,21 @@
     <h2 class="card-title">Historial práctica</h2>
     {% if historial_practica and historial_practica|length > 0 %}
         {% for intento in historial_practica %}
-            <p class="card-desc" style="font-size:0.8rem;">
-                {{ intento.fecha_hora_realiza }} —
-                {{ "%.2f"|format(intento.calificacion) }}%
-                {% if intento.aprobado %}
-                    (Aprobado)
-                {% else %}
-                    (No aprobado)
-                {% endif %}
-            </p>
+            <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(148,163,184,0.2);">
+                <p class="card-desc" style="font-size:0.8rem; margin-bottom:6px;">
+                    {{ intento.fecha_hora_realiza }} —
+                    {{ "%.2f"|format(intento.calificacion) }}%
+                    {% if intento.aprobado %}
+                        (Aprobado)
+                    {% else %}
+                        (No aprobado)
+                    {% endif %}
+                </p>
+                <a class="btn-secondary full-width"
+                   href="{{ url_for('exam.review_attempt', id_intento=intento.id_intento) }}">
+                    Ver detalles
+                </a>
+            </div>
         {% endfor %}
     {% else %}
         <p class="card-desc" style="font-size:0.8rem; color:#64748b;">
@@ -67,15 +73,21 @@
     <h2 class="card-title">Historial examen final</h2>
     {% if historial_final and historial_final|length > 0 %}
         {% for intento in historial_final %}
-            <p class="card-desc" style="font-size:0.8rem;">
-                {{ intento.fecha_hora_realiza }} —
-                {{ "%.2f"|format(intento.calificacion) }}%
-                {% if intento.aprobado %}
-                    (Aprobado)
-                {% else %}
-                    (No aprobado)
-                {% endif %}
-            </p>
+            <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(148,163,184,0.2);">
+                <p class="card-desc" style="font-size:0.8rem; margin-bottom:6px;">
+                    {{ intento.fecha_hora_realiza }} —
+                    {{ "%.2f"|format(intento.calificacion) }}%
+                    {% if intento.aprobado %}
+                        (Aprobado)
+                    {% else %}
+                        (No aprobado)
+                    {% endif %}
+                </p>
+                <a class="btn-secondary full-width"
+                   href="{{ url_for('exam.review_attempt', id_intento=intento.id_intento) }}">
+                    Ver detalles
+                </a>
+            </div>
         {% endfor %}
     {% else %}
         <p class="card-desc" style="font-size:0.8rem; color:#64748b;">
