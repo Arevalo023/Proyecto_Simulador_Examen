@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+ 
+<div class="card">
+    <h2 class="card-title">
+        Revisión del examen
+        {% if intento.tipo_test == 'practica' %}
+            de práctica
+        {% else %}
+            final
+        {% endif %}
+    </h2>
+ 
+    <p class="card-desc">
+        Intento #{{ intento.id_intento }} — {{ intento.fecha_hora_realiza }}<br>
+        Calificación: {{ "%.2f"|format(intento.calificacion) }}%
+        {% if intento.aprobado %}
+            (Aprobado)
+        {% else %}
+            (No aprobado)
+        {% endif %}
+    </p>
+ 
+    <p class="card-desc" style="font-size:0.8rem; color:#cbd5e1;">
+        Preguntas: {{ intento.total_preguntas }} ·
+        Correctas: {{ intento.correctas }} ·
+        Incorrectas: {{ intento.incorrectas }} ·
+        Sin responder / fuera de tiempo: {{ intento.sin_responder }}
+    </p>
+ 
+    <div class="actions-row" style="margin-top:12px;">
+        <a class="btn-secondary" href="{{ url_for('auth.alumno_home') }}">
+            Volver al inicio
+        </a>
+    </div>
+</div>
+ 
+{% for q in preguntas %}
+    <div class="card" style="margin-top:16px;">
+        <p class="card-desc" style="margin-bottom:8px;">
+            <strong>{{ loop.index }}.</strong> {{ q.reactivo }}
+            {% if q.categoria_tema %}
+                <span style="font-size:0.75rem; color:#64748b;"> · Tema: {{ q.categoria_tema }}</span>
+            {% endif %}
+        </p>
+ 
+            {% if q.imagen_ruta %}
+                <img
+                    src="{{ '/' ~ q.imagen_ruta }}"
+                    alt="Imagen de la pregunta"
+                    style="width:100%; border-radius:10px; margin-bottom:10px;"
+                >
+            {% endif %}
+            
+        <div style="font-size:0.8rem;">
+        <div class="
+            {% if q.es_correcta %}bg-correcta
+            {% elif q.opcion_elegida %}bg-incorrecta
+            {% else %}bg-neutra{% endif %}
+            " style="margin-bottom:6px; padding:8px; border-radius:8px;">
+ 
+                {% if q.opcion_elegida %}
+                    <strong>Tu respuesta:</strong> {{ q.opcion_elegida }}
+                    {% if q.es_correcta %}
+                        <span style="color:#4ade80;"> · Correcta ✓</span>
+                    {% else %}
+                        <span style="color:#fca5a5;"> · Incorrecta ✗</span>
+                    {% endif %}
+                {% else %}
+                    <strong>No respondiste esta pregunta.</strong>
+                {% endif %}
+ 
+                {% if not q.contestada_a_tiempo %}
+                    <span style="color:#f97316;"> · Fuera de tiempo</span>
+                {% endif %}
+            </div>
+ 
+            <div style="margin-top:4px; color:#94a3b8;">
+                <strong>Respuesta correcta:</strong> {{ q.opcion_correcta }}
+            </div>
+ 
+            {% if q.tiempo_respuesta_segundos is not none %}
+                <div style="margin-top:4px; color:#64748b;">
+                    Tiempo de respuesta: {{ q.tiempo_respuesta_segundos }} s
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+ 
+{% endblock %}
+ 
+ 

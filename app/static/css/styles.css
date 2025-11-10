@@ -231,3 +231,6 @@ label {
     border-color: rgba(96,165,250,0.4);
     color: #bfdbfe;
 }
+.bg-correcta { background: rgba(16,185,129,0.2); }
+.bg-incorrecta { background: rgba(239,68,68,0.2); }
+.bg-neutra { background: rgba(148,163,184,0.15); }

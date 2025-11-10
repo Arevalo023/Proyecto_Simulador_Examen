@@ -2,7 +2,6 @@
 
 from app.db import Db
 import random
-import time
 
 def contar_intentos(matricula, tipo_test):
     """
@@ -341,3 +340,143 @@ def obtener_historial_intentos(matricula, tipo_test):
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
+def obtener_detalle_intento(id_intento, matricula=None):
+    """
+    Regresa el detalle completo de un intento:
+    - datos generales del intento (tipo, fecha, calificación, aprobado)
+    - lista de preguntas con:
+        * texto de la pregunta
+        * categoría/tema
+        * ruta de imagen (si tiene)
+        * opción correcta
+        * opción elegida (si hubo)
+        * si la respuesta fue correcta o no
+        * si contestó a tiempo
+        * tiempo de respuesta en segundos
+
+    Si 'matricula' se pasa, valida que el intento pertenezca a ese alumno.
+    Si no existe o no coincide la matrícula -> regresa None.
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = Db.get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # 1) Datos generales del intento
+        sql_intento = """
+            SELECT 
+                ie.id_intento,
+                ie.matricula,
+                ie.tipo_test,
+                ie.fecha_hora_realiza,
+                ie.calificacion,
+                ie.aprobado
+            FROM intentos_examen ie
+            WHERE ie.id_intento = %s
+            LIMIT 1;
+        """
+        cursor.execute(sql_intento, (id_intento,))
+        intento_row = cursor.fetchone()
+
+        if not intento_row:
+            return None
+
+        # si se pasa matricula, validamos que el intento sea de ese alumno
+        if matricula is not None and str(intento_row["matricula"]) != str(matricula):
+            return None
+
+        # 2) Detalle de cada pregunta del intento
+        sql_detalle = """
+            SELECT
+                er.id_pregunta,
+                p.reactivo,
+                p.categoria_tema,
+                bi.ruta AS imagen_ruta,
+                er.id_respuesta_elegida,
+                er.contestada_a_tiempo,
+                er.tiempo_respuesta_segundos,
+                rc.id_respuesta   AS id_respuesta_correcta,
+                rc.opcion         AS opcion_correcta,
+                re.opcion         AS opcion_elegida,
+                re.ok             AS ok_elegida
+            FROM examen_respuestas er
+            JOIN preguntas p
+                ON p.id_pregunta = er.id_pregunta
+            LEFT JOIN banco_imagenes bi
+                ON bi.codigo_imagen = p.codigo_imagen
+            LEFT JOIN respuestas rc
+                ON rc.id_pregunta = p.id_pregunta
+               AND rc.ok = 1
+            LEFT JOIN respuestas re
+                ON re.id_respuesta = er.id_respuesta_elegida
+            WHERE er.id_intento = %s
+            ORDER BY er.id_seleccion ASC;
+        """
+        cursor.execute(sql_detalle, (id_intento,))
+        rows = cursor.fetchall()
+
+        preguntas = []
+        total = len(rows)
+        correctas = 0
+        incorrectas = 0
+        sin_responder = 0
+
+        for row in rows:
+            id_resp_elegida = row["id_respuesta_elegida"]
+            contestada_tiempo = row["contestada_a_tiempo"]
+            ok_elegida = row["ok_elegida"]
+
+            es_correcta = False
+
+            if id_resp_elegida is None:
+                # no eligió ninguna opción
+                sin_responder += 1
+            else:
+                # eligió algo; si ok=1 y contestó a tiempo => correcta
+                if ok_elegida == 1 and contestada_tiempo == 1:
+                    correctas += 1
+                    es_correcta = True
+                else:
+                    incorrectas += 1
+
+            preguntas.append({
+                "id_pregunta": row["id_pregunta"],
+                "reactivo": row["reactivo"],
+                "categoria_tema": row["categoria_tema"],
+                "imagen_ruta": row["imagen_ruta"],
+                "opcion_correcta": row["opcion_correcta"],
+                "opcion_elegida": row["opcion_elegida"],
+                "es_correcta": es_correcta,
+                "contestada_a_tiempo": contestada_tiempo,
+                "tiempo_respuesta_segundos": row["tiempo_respuesta_segundos"],
+            })
+
+        intento_info = {
+            "id_intento": intento_row["id_intento"],
+            "matricula": intento_row["matricula"],
+            "tipo_test": intento_row["tipo_test"],
+            "fecha_hora_realiza": intento_row["fecha_hora_realiza"],
+            "calificacion": float(intento_row["calificacion"]),
+            "aprobado": intento_row["aprobado"],
+            "total_preguntas": total,
+            "correctas": correctas,
+            "incorrectas": incorrectas,
+            "sin_responder": sin_responder
+        }
+
+        return {
+            "intento": intento_info,
+            "preguntas": preguntas
+        }
+
+    except Exception as e:
+        print("Error en obtener_detalle_intento:", e)
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
