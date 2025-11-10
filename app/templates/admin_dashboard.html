@@ -1,16 +1,184 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card">
-    <h2 class="card-title">Panel de Administrador</h2>
-    <p class="card-desc">
-        Hola {{ nombre }} ({{ rol }}), matricula {{ matricula }}.
-    </p>
+<div class="dashboard-container">
+    <!-- Header del Dashboard -->
+    <div class="card">
+        <h2 class="card-title">Panel de Administrador</h2>
+        <p class="card-desc">
+            Hola <strong>{{ nombre }}</strong> ({{ rol }}), matrícula {{ matricula }}.
+        </p>
+    </div>
 
-    <p class="card-desc">
-        Aquí va el dashboard: intentos de practica vs final,
-        % aprobados, promedios, etc. PENDIENTE
-    </p>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Separador -->
+    <div class="dashboard-separator" aria-hidden="true">
+        <div class="line"></div>
+        <div class="label">Resumen General</div>
+        <div class="line"></div>
+    </div>
+
+    <!-- 4 Tarjetas Horizontalmente -->
+    <div class="stat-card-grid">
+        <div class="stat-card">
+            <h4>Promedio General</h4>
+            <p id="stat-avg-global">...</p>
+        </div>
+        <div class="stat-card">
+            <h4>Calificación Más Alta</h4>
+            <p id="stat-max-calif" style="color: #10b981;">...</p>
+        </div>
+        <div class="stat-card">
+            <h4>Calificación Más Baja</h4>
+            <p id="stat-min-calif" style="color: #ef4444;">...</p>
+        </div>
+        <div class="stat-card">
+            <h4>Total Exámenes</h4>
+            <p id="stat-total-examenes">...</p>
+        </div>
+    </div>
+
+    <!-- 2 Gráficas -->
+    <div class="charts-grid">
+        <div class="chart-container">
+            <h4>Status Exámenes Finales</h4>
+            <canvas id="statusFinalChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <h4>Temas Más Difíciles (Global)</h4>
+            <canvas id="temasDificilesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Preguntas con Menor Acierto -->
+    <div class="card full-width-section">
+        <h4>Preguntas con Menor Acierto</h4>
+        <div style="max-height: 400px; overflow-y: auto;">
+            <ol id="lista-preguntas-dificiles" class="questions-list">
+                <li>Cargando...</li>
+            </ol>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('{{ url_for("dashboard_bp.get_admin_data") }}');
+            if (!response.ok) throw new Error('Error al cargar datos de admin');
+            
+            const data = await response.json();
+            
+            // --- 1. Poblar Tarjetas ---
+            const stats = data.stats_generales;
+            document.getElementById('stat-avg-global').innerHTML = `${stats.avg_global.toFixed(2)} <span class="unit">pts</span>`;
+            document.getElementById('stat-max-calif').innerHTML = `${stats.max_calif.toFixed(2)} <span class="unit">pts</span>`;
+            document.getElementById('stat-min-calif').innerHTML = `${stats.min_calif.toFixed(2)} <span class="unit">pts</span>`;
+            
+            // Calcular total de exámenes
+            const totalExamenes = stats.total_aprobados_final + stats.total_reprobados_final;
+            document.getElementById('stat-total-examenes').innerHTML = `${totalExamenes} <span class="unit">exámenes</span>`;
+
+          // --- 2. Gráfica Aprobados/Reprobados (Pie) ---
+const ctxStatus = document.getElementById('statusFinalChart').getContext('2d');
+new Chart(ctxStatus, {
+    type: 'doughnut',
+    data: {
+        labels: ['Aprobados', 'Reprobados'],
+        datasets: [{
+            data: [stats.total_aprobados_final, stats.total_reprobados_final],
+            backgroundColor: [
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(239, 68, 68, 0.8)'
+            ],
+            borderColor: [
+                'rgba(16, 185, 129, 1)',
+                'rgba(239, 68, 68, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        aspectRatio: 1, // Relación 1:1 (cuadrado perfecto)
+        plugins: {
+            legend: { 
+                position: 'bottom',
+                labels: {
+                    color: '#e2e8f0',
+                    font: { size: 12 }
+                }
+            }
+        }
+    }
+});
+            
+            // --- 3. Gráfica Temas Difíciles (Barra Horizontal) ---
+            const temas = data.temas_dificiles;
+            if (temas.length > 0) {
+                const ctxTemas = document.getElementById('temasDificilesChart').getContext('2d');
+                new Chart(ctxTemas, {
+                    type: 'bar',
+                    data: {
+                        labels: temas.map(t => t.categoria_tema),
+                        datasets: [{
+                            label: '% de Acierto',
+                            data: temas.map(t => t.porcentaje_acierto),
+                            backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { 
+                                    callback: (value) => value + '%',
+                                    color: '#94a3b8'
+                                },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        },
+                        plugins: { 
+                            legend: { 
+                                display: false 
+                            } 
+                        }
+                    }
+                });
+            }
+            
+            // --- 4. Lista Preguntas Difíciles ---
+            const preguntas = data.preguntas_dificiles;
+            const listaElem = document.getElementById('lista-preguntas-dificiles');
+            listaElem.innerHTML = '';
+            
+            if (preguntas.length > 0) {
+                preguntas.forEach(p => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${p.reactivo} <i>(${p.porcentaje_acierto.toFixed(1)}% acierto)</i>`;
+                    listaElem.appendChild(li);
+                });
+            } else {
+                listaElem.innerHTML = '<li>No hay datos suficientes para mostrar preguntas difíciles.</li>';
+            }
+
+        } catch (error) {
+            console.error('Error al cargar dashboard de admin:', error);
+            // Mostrar error al usuario
+            alert('Error al cargar los datos del dashboard. Por favor, recarga la página.');
+        }
+    });
+</script>
 
 {% endblock %}

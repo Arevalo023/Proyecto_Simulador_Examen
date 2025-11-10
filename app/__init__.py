@@ -6,6 +6,7 @@ from config import Config
 # Importar blueprints
 from app.routes.auth_routes import auth_bp
 from app.routes.exam_routes import exam_bp
+from app.routes.dashboard_routes import dashboard_bp
 
 def create_app():
     app = Flask(__name__)
@@ -14,5 +15,6 @@ def create_app():
     # Registrar blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(exam_bp)
+    app.register_blueprint(dashboard_bp)
 
     return app

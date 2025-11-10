@@ -1,47 +1,45 @@
-<!-- app/templates/base.html -->
 <!DOCTYPE html>
 <html lang="es">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <title>{{ title if title else "Simulador de Manejo" }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-</head>
+  </head>
 
-<body class="page-bg">
-
+  <body class="page-bg">
     <nav class="topbar">
-        <div class="topbar-left">
-            <span class="brand">Simulador Manejo</span>
-        </div>
+      <div class="topbar-left">
+        <span class="brand">Simulador Manejo</span>
+      </div>
 
-        <div class="topbar-right">
-            {% if session.get("usuario_matricula") %}
-                <span class="user-chip">
-                    {{ session.get("usuario_nombre") }} ({{ session.get("usuario_rol") }})
-                </span>
-                <a class="logout-btn" href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
-            {% endif %}
-        </div>
+      <div class="topbar-right">
+        {% if session.get("usuario_matricula") %}
+        <span class="user-chip">
+          {{ session.get("usuario_nombre") }} ({{ session.get("usuario_rol") }})
+        </span>
+        <a class="logout-btn" href="{{ url_for('auth.logout') }}"
+          >Cerrar sesión</a
+        >
+        {% endif %}
+      </div>
     </nav>
 
     <!-- mensajes flash -->
     <div class="flash-area">
-        {% with mensajes = get_flashed_messages(with_categories=true) %}
-            {% if mensajes %}
-                {% for categoria, msg in mensajes %}
-                    <div class="flash-msg {{ categoria }}">
-                        {{ msg }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+      {% with mensajes = get_flashed_messages(with_categories=true) %} {% if
+      mensajes %} {% for categoria, msg in mensajes %}
+      <div class="flash-msg {{ categoria }}">{{ msg }}</div>
+      {% endfor %} {% endif %} {% endwith %}
     </div>
 
-    <main class="main-wrapper">
-        {% block content %}{% endblock %}
+    <main
+      class="main-wrapper {% if request.endpoint and 'dashboard' in request.endpoint %}dashboard-layout{% else %}centered-layout{% endif %}"
+    >
+      {% block content %}{% endblock %}
     </main>
-
-</body>
+  </body>
 </html>

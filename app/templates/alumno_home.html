@@ -1,99 +1,239 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card">
-    <h2 class="card-title">Bienvenido</h2>
-    <p class="card-desc">
-        Hola {{ nombre }}
-    </p>
+<style>
+    /* Forzar layout de dashboard para esta página */
+    .main-wrapper {
+        max-width: none !important;
+        padding: 0 24px !important;
+    }
+</style>
 
-    <p class="card-desc">
-        Desde aquí puedes iniciar el simulador de práctica (20 preguntas, 1 min c/u)
-        y el examen final (40 preguntas).
-    </p>
+<!-- Incluir Boxicons -->
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    <div class="card-desc" style="font-size:0.8rem; color:#cbd5e1;">
-        Intentos práctica restantes: {{ restantes_practica }} / 6<br>
-        Intentos final restantes: {{ restantes_final }} / 3
+<div class="dashboard-container">
+    <!-- Tarjeta de Bienvenida - Ancho completo -->
+    <div class="card dashboard-header">
+        <h2 class="card-title">Bienvenido, {{ nombre }}</h2>
+        <p class="card-desc">
+            Desde aquí puedes iniciar el simulador de práctica (20 preguntas, 1 min c/u)
+            y el examen final (40 preguntas).
+        </p>
+
+        <div class="card-desc" style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong>Intentos disponibles:</strong><br>
+            • Práctica: {{ restantes_practica }} / 6<br>
+            • Examen Final: {{ restantes_final }} / 3
+        </div>
+
+        <div class="actions-row" style="margin-top: 20px; gap: 12px;">
+            {% if restantes_practica > 0 %}
+                <a class="btn-primary full-width" href="{{ url_for('exam.start_practica') }}">
+                    <i class='bx bx-play-circle'></i> Iniciar Práctica
+                </a>
+            {% else %}
+                <button class="btn-secondary full-width" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    <i class='bx bx-error-circle'></i> Sin intentos de práctica
+                </button>
+            {% endif %}
+
+            {% if restantes_final > 0 %}
+                <a class="btn-secondary full-width" href="{{ url_for('exam.start_final') }}">
+                    <i class='bx bx-edit-alt'></i> Iniciar Examen Final
+                </a>
+            {% else %}
+                <button class="btn-secondary full-width" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    <i class='bx bx-error-circle'></i> Sin intentos final
+                </button>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="actions-row" style="margin-top:16px;">
-        {% if restantes_practica > 0 %}
-            <a class="btn-primary full-width" href="{{ url_for('exam.start_practica') }}">
-                Iniciar práctica
-            </a>
-        {% else %}
-            <button class="btn-primary full-width" disabled
-                    style="opacity:0.4; cursor:not-allowed;">
-                Sin intentos de práctica
-            </button>
-        {% endif %}
+    <!-- Separador -->
+    <div class="dashboard-separator">
+        <div class="line"></div>
+        <div class="label">Tu Desempeño</div>
+        <div class="line"></div>
+    </div>
 
-        {% if restantes_final > 0 %}
-            <a class="btn-secondary full-width" href="{{ url_for('exam.start_final') }}">
-                Iniciar examen final
-            </a>
-        {% else %}
-            <button class="btn-secondary full-width" disabled
-                    style="opacity:0.4; cursor:not-allowed;">
-                Sin intentos final
-            </button>
-        {% endif %}
+    <!-- 4 CARDS EN UNA FILA -->
+    <div class="stat-card-grid">
+        <div class="stat-card">
+            <h4><i class='bx bx-trophy'></i> Mejor Calificación (Práctica)</h4>
+            <p id="stat-max-practica">...</p>
+        </div>
+        <div class="stat-card">
+            <h4><i class='bx bx-medal'></i> Mejor Calificación (Final)</h4>
+            <p id="stat-max-final">...</p>
+        </div>
+        <div class="stat-card">
+            <h4><i class='bx bx-time-five'></i> Tiempo Promedio Respuesta</h4>
+            <p id="stat-avg-tiempo">...</p>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));">
+            <h4><i class='bx bx-trending-up'></i> Predicción Examen Final</h4>
+            <p id="stat-prediccion">...</p>
+        </div>
+    </div>
+
+    <!-- GRÁFICA DEBAJO - ANCHO COMPLETO -->
+    <div class="card">
+        <h2 class="card-title"><i class='bx bx-target-lock'></i> Áreas de Mejora</h2>
+        <p id="msg-temas-fallidos" style="display: none; color: #10b981; padding: 20px; text-align: center;">
+            <i class='bx bx-party' style="font-size: 1.5rem; margin-right: 8px;"></i> ¡Felicidades! No tienes errores significativos en ninguna categoría.
+        </p>
+        <div class="chart-container">
+            <canvas id="temasFallidosChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Separador -->
+    <div class="dashboard-separator">
+        <div class="line"></div>
+        <div class="label">Historial</div>
+        <div class="line"></div>
+    </div>
+
+    <!-- Historiales - 2 columnas en desktop -->
+    <div class="dashboard-grid">
+        <!-- Historial Práctica -->
+        <div class="card">
+            <h2 class="card-title"><i class='bx bx-history'></i> Historial de Práctica</h2>
+            {% if historial_practica and historial_practica|length > 0 %}
+                <div style="max-height: 400px; overflow-y: auto;">
+                    {% for intento in historial_practica %}
+                        <div class="history-item {% if intento.aprobado %}aprobado{% else %}reprobado{% endif %}">
+                            <div class="history-header">
+                                <span style="font-size: 0.9rem; color: #cbd5e1;">
+                                    <i class='bx bx-calendar' style="margin-right: 4px;"></i>{{ intento.fecha_hora_realiza }}
+                                </span>
+                                <span style="font-weight: 600; color: {% if intento.aprobado %}#10b981{% else %}#ef4444{% endif %};">
+                                    {% if intento.aprobado %}
+                                        <i class='bx bx-check-circle'></i>
+                                    {% else %}
+                                        <i class='bx bx-x-circle'></i>
+                                    {% endif %}
+                                    {{ "%.2f"|format(intento.calificacion) }}%
+                                </span>
+                            </div>
+                            <a class="btn-secondary" style="width: 100%; padding: 8px; margin-top: 8px;" 
+                               href="{{ url_for('exam.review_attempt', id_intento=intento.id_intento) }}">
+                                <i class='bx bx-stats'></i> Ver Detalles
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="card-desc" style="text-align: center; color: #64748b; padding: 20px;">
+                    <i class='bx bx-notepad' style="font-size: 2rem; display: block; margin-bottom: 8px;"></i>
+                    Aún no has iniciado prácticas.
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- Historial Examen Final -->
+        <div class="card">
+            <h2 class="card-title"><i class='bx bx-clipboard'></i> Historial de Examen Final</h2>
+            {% if historial_final and historial_final|length > 0 %}
+                <div style="max-height: 400px; overflow-y: auto;">
+                    {% for intento in historial_final %}
+                        <div class="history-item {% if intento.aprobado %}aprobado{% else %}reprobado{% endif %}">
+                            <div class="history-header">
+                                <span style="font-size: 0.9rem; color: #cbd5e1;">
+                                    <i class='bx bx-calendar' style="margin-right: 4px;"></i>{{ intento.fecha_hora_realiza }}
+                                </span>
+                                <span style="font-weight: 600; color: {% if intento.aprobado %}#10b981{% else %}#ef4444{% endif %};">
+                                    {% if intento.aprobado %}
+                                        <i class='bx bx-check-circle'></i>
+                                    {% else %}
+                                        <i class='bx bx-x-circle'></i>
+                                    {% endif %}
+                                    {{ "%.2f"|format(intento.calificacion) }}%
+                                </span>
+                            </div>
+                            <a class="btn-secondary" style="width: 100%; padding: 8px; margin-top: 8px;" 
+                               href="{{ url_for('exam.review_attempt', id_intento=intento.id_intento) }}">
+                                <i class='bx bx-stats'></i> Ver Detalles
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="card-desc" style="text-align: center; color: #64748b; padding: 20px;">
+                    <i class='bx bx-target-lock' style="font-size: 2rem; display: block; margin-bottom: 8px;"></i>
+                    Aún no has hecho examen final.
+                </p>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<div class="card">
-    <h2 class="card-title">Historial práctica</h2>
-    {% if historial_practica and historial_practica|length > 0 %}
-        {% for intento in historial_practica %}
-            <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(148,163,184,0.2);">
-                <p class="card-desc" style="font-size:0.8rem; margin-bottom:6px;">
-                    {{ intento.fecha_hora_realiza }} —
-                    {{ "%.2f"|format(intento.calificacion) }}%
-                    {% if intento.aprobado %}
-                        (Aprobado)
-                    {% else %}
-                        (No aprobado)
-                    {% endif %}
-                </p>
-                <a class="btn-secondary full-width"
-                   href="{{ url_for('exam.review_attempt', id_intento=intento.id_intento) }}">
-                    Ver detalles
-                </a>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="card-desc" style="font-size:0.8rem; color:#64748b;">
-            Aún no has iniciado prácticas.
-        </p>
-    {% endif %}
-</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('{{ url_for("dashboard_bp.get_alumno_data") }}');
+            if (!response.ok) throw new Error('Error al cargar datos');
+            
+            const data = await response.json();
+            
+            // --- 1. Poblar Tarjetas ---
+            const stats = data.stats_generales;
+            document.getElementById('stat-max-practica').innerHTML = `${stats.max_calif_practica.toFixed(2)} <span class="unit">pts</span>`;
+            document.getElementById('stat-max-final').innerHTML = `${stats.max_calif_final.toFixed(2)} <span class="unit">pts</span>`;
+            document.getElementById('stat-avg-tiempo').innerHTML = `${stats.avg_tiempo_segundos.toFixed(1)} <span class="unit">seg</span>`;
+            document.getElementById('stat-prediccion').innerHTML = `${stats.prediccion_final.toFixed(2)} <span class="unit">pts</span>`;
 
-<div class="card">
-    <h2 class="card-title">Historial examen final</h2>
-    {% if historial_final and historial_final|length > 0 %}
-        {% for intento in historial_final %}
-            <div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(148,163,184,0.2);">
-                <p class="card-desc" style="font-size:0.8rem; margin-bottom:6px;">
-                    {{ intento.fecha_hora_realiza }} —
-                    {{ "%.2f"|format(intento.calificacion) }}%
-                    {% if intento.aprobado %}
-                        (Aprobado)
-                    {% else %}
-                        (No aprobado)
-                    {% endif %}
-                </p>
-                <a class="btn-secondary full-width"
-                   href="{{ url_for('exam.review_attempt', id_intento=intento.id_intento) }}">
-                    Ver detalles
-                </a>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="card-desc" style="font-size:0.8rem; color:#64748b;">
-            Aún no has hecho examen final.
-        </p>
-    {% endif %}
-</div>
+            // --- 2. Renderizar Gráfica Temas Fallidos ---
+            const temas = data.temas_fallidos;
+            if (temas.length > 0) {
+                const ctx = document.getElementById('temasFallidosChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: temas.map(t => t.categoria_tema),
+                        datasets: [{
+                            label: '% de Error',
+                            data: temas.map(t => t.porcentaje_error),
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: (value) => value + '%',
+                                    color: '#94a3b8'
+                                },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('temasFallidosChart').style.display = 'none';
+                document.getElementById('msg-temas-fallidos').style.display = 'block';
+            }
+
+        } catch (error) {
+            console.error('Error al cargar dashboard:', error);
+            alert('Error al cargar los datos. Por favor, recarga la página.');
+        }
+    });
+</script>
 
 {% endblock %}
